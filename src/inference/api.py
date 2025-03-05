@@ -64,7 +64,10 @@ def inference_code(models, text,  spk_emb = None, top_P = 0.7,  top_K = 20,  tem
 
 def refine_text(models, text, top_P = 0.7, top_K = 20, temperature = 0.7, repetition_penalty = 1.0, max_new_token = 384, prompt = '', **kwargs):
     device = next(models['gpt'].parameters()).device
-    
+
+    if not hasattr(models['tokenizer'], 'pad_token') or models['tokenizer'].pad_token is None:
+        models['tokenizer'].pad_token = '[PAD]'
+
     if not isinstance(text, list): 
         text = [text]
     
