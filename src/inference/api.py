@@ -65,19 +65,30 @@ def inference_code(models, text,  spk_emb = None, top_P = 0.7,  top_K = 20,  tem
 def refine_text(models, text, top_P = 0.7, top_K = 20, temperature = 0.7, repetition_penalty = 1.0, max_new_token = 384, prompt = '', **kwargs):
     device = next(models['gpt'].parameters()).device
 
+    # More robust pad token handling
     if not hasattr(models['tokenizer'], 'pad_token') or models['tokenizer'].pad_token is None:
-        models['tokenizer'].pad_token = '[PAD]'
+        # Try to set a common token as pad token
+        if hasattr(models['tokenizer'], 'vocab'):
+            # Check if [PAD] exists in vocabulary
+            if '[PAD]' in models['tokenizer'].vocab:
+                models['tokenizer'].pad_token = '[PAD]'
+            # Fallback to other special tokens
+            elif hasattr(models['tokenizer'], 'sep_token') and models['tokenizer'].sep_token is not None:
+                models['tokenizer'].pad_token = models['tokenizer'].sep_token
+            elif hasattr(models['tokenizer'], 'eos_token') and models['tokenizer'].eos_token is not None:
+                models['tokenizer'].pad_token = models['tokenizer'].eos_token
+            else:
+                # Last resort - use some common token from vocabulary
+                models['tokenizer'].pad_token = list(models['tokenizer'].vocab.keys())[0]
+        else:
+            # For fast tokenizers with no direct vocab access
+            models['tokenizer'].pad_token = models['tokenizer'].sep_token or models['tokenizer'].eos_token or '.'
 
-    if not isinstance(text, list): 
+    # Rest of your function remains unchanged
+    if not isinstance(text, list):
         text = [text]
-    
-    assert len(text), 'text should not be empty'
 
-    print("Tokenizer type:", type(models['tokenizer']))
-    print("Has pad_token attribute:", hasattr(models['tokenizer'], 'pad_token'))
-    if hasattr(models['tokenizer'], 'pad_token'):
-        print("Pad token value:", models['tokenizer'].pad_token)
-    print("Available attributes:", dir(models['tokenizer']))
+    assert len(text), 'text should not be empty'
 
     text = [f"[Sbreak]{i}[Pbreak]{prompt}" for i in text]
     text_token = models['tokenizer'](text, return_tensors='pt', add_special_tokens=False, padding=True).to(device)
