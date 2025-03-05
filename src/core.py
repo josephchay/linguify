@@ -1,15 +1,14 @@
 import os
 import logging
 from omegaconf import OmegaConf
-
 import torch
 from vocos import Vocos
+from huggingface_hub import snapshot_download
+
 from .model.dvae import DVAE
 from .model.gpt import GPTWrapper
 from .utils.gpu_utils import select_device
 from .inference.api import refine_text, inference_code
-
-from huggingface_hub import snapshot_download
 
 logging.basicConfig(level = logging.INFO)
 
