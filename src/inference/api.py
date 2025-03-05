@@ -73,6 +73,12 @@ def refine_text(models, text, top_P = 0.7, top_K = 20, temperature = 0.7, repeti
     
     assert len(text), 'text should not be empty'
 
+    print("Tokenizer type:", type(models['tokenizer']))
+    print("Has pad_token attribute:", hasattr(models['tokenizer'], 'pad_token'))
+    if hasattr(models['tokenizer'], 'pad_token'):
+        print("Pad token value:", models['tokenizer'].pad_token)
+    print("Available attributes:", dir(models['tokenizer']))
+
     text = [f"[Sbreak]{i}[Pbreak]{prompt}" for i in text]
     text_token = models['tokenizer'](text, return_tensors='pt', add_special_tokens=False, padding=True).to(device)
     text_mask = torch.ones(text_token['input_ids'].shape, dtype=bool, device=device)
