@@ -37,59 +37,7 @@ class Chat:
             
         return not not_finish
 
-    def transfer_models_to_own_repo(self, target_repo_id):
-        """
-        Transfer model files from the original 2Noise/ChatTTS repository to your own repository.
-
-        Args:
-            target_repo_id (str): Your Hugging Face repository ID (e.g., "your-username/ChatTTS")
-
-        Returns:
-            bool: True if transfer was successful
-        """
-        from huggingface_hub import snapshot_download, create_repo, upload_folder
-
-        # Ensure we're logged in to Hugging Face
-        self.logger.log(logging.INFO, "Logging in to Hugging Face...")
-        try:
-            from google.colab import output
-            output.enable_custom_widget_manager()
-            login()
-        except Exception as e:
-            self.logger.log(logging.ERROR, f"Login failed: {e}")
-            self.logger.log(logging.ERROR, "Please ensure you have a valid Hugging Face token.")
-            return False
-        
-        # Step 1: Download from original repo
-        self.logger.log(logging.INFO, f"Downloading files from 2Noise/ChatTTS...")
-        source_download_path = snapshot_download(
-            repo_id="2Noise/ChatTTS",
-            allow_patterns=["*.pt", "*.yaml", "*.json", "config/*"]
-        )
-
-        # Step 2: Create target repo if it doesn't exist
-        self.logger.log(logging.INFO, f"Creating target repository: {target_repo_id}...")
-        try:
-            create_repo(target_repo_id, private=True)  # Set to False for public repo
-        except Exception as e:
-            self.logger.log(logging.WARNING, f"Note: {e}")
-            self.logger.log(logging.INFO, "Continuing with upload (repository might already exist)")
-
-        # Step 3: Upload files to target repo
-        self.logger.log(logging.INFO, f"Uploading files to {target_repo_id}...")
-        upload_folder(
-            folder_path=source_download_path,
-            repo_id=target_repo_id,
-            commit_message="Model files and assets."
-        )
-
-        self.logger.log(logging.INFO, f"Successfully transferred files to {target_repo_id}")
-        return True
-
     def load_models(self, source='huggingface'):
-        repo_id = 'josephchay/LinguifyTTS'
-        self.transfer_models_to_own_repo(repo_id)
-
         if source == 'huggingface':
             download_path = snapshot_download(repo_id=repo_id, allow_patterns=["*.pt", "*.yaml"])
             self._load(**{k: os.path.join(download_path, v) for k, v in OmegaConf.load(os.path.join(download_path, 'config', 'path.yaml')).items()})
