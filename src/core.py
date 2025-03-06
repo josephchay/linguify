@@ -49,6 +49,17 @@ class Chat:
         """
         from huggingface_hub import snapshot_download, create_repo, upload_folder
 
+        # Ensure we're logged in to Hugging Face
+        self.logger.log(logging.INFO, "Logging in to Hugging Face...")
+        try:
+            from google.colab import output
+            output.enable_custom_widget_manager()
+            login()
+        except Exception as e:
+            self.logger.log(logging.ERROR, f"Login failed: {e}")
+            self.logger.log(logging.ERROR, "Please ensure you have a valid Hugging Face token.")
+            return False
+        
         # Step 1: Download from original repo
         self.logger.log(logging.INFO, f"Downloading files from 2Noise/ChatTTS...")
         source_download_path = snapshot_download(
@@ -69,7 +80,7 @@ class Chat:
         upload_folder(
             folder_path=source_download_path,
             repo_id=target_repo_id,
-            commit_message="Copy of 2Noise/ChatTTS model files"
+            commit_message="Model files and assets."
         )
 
         self.logger.log(logging.INFO, f"Successfully transferred files to {target_repo_id}")
