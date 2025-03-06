@@ -41,21 +41,22 @@ class Chat:
         if source == 'huggingface':
             download_path = snapshot_download(repo_id='josephchay/LinguifyTTS', allow_patterns=["*.pt", "*.yaml"])
             self._load(**{k: os.path.join(download_path, v) for k, v in OmegaConf.load(os.path.join(download_path, 'config', 'path.yaml')).items()})
-            
+
     def _load(self, vocos_config_path: str = None, vocos_ckpt_path: str = None, dvae_config_path: str = None,
               dvae_ckpt_path: str = None, gpt_config_path: str = None, gpt_ckpt_path: str = None,
-              decoder_config_path: str = None, decoder_ckpt_path: str = None, tokenizer_path: str = None, device: str = None):
+              decoder_config_path: str = None, decoder_ckpt_path: str = None, tokenizer_path: str = None,
+              device: str = None):
         if not device:
             device = select_device(4096)
             self.logger.log(logging.INFO, f'use {device}')
-            
+
         if vocos_config_path:
             vocos = Vocos.from_hparams(vocos_config_path).to(device).eval()
             assert vocos_ckpt_path, 'vocos_ckpt_path should not be None'
             vocos.load_state_dict(torch.load(vocos_ckpt_path))
             self.pretrain_models['vocos'] = vocos
             self.logger.log(logging.INFO, 'vocos loaded.')
-        
+
         if dvae_config_path:
             cfg = OmegaConf.load(dvae_config_path)
             dvae = DVAE(**cfg).to(device).eval()
@@ -63,7 +64,7 @@ class Chat:
             dvae.load_state_dict(torch.load(dvae_ckpt_path, map_location='cpu'))
             self.pretrain_models['dvae'] = dvae
             self.logger.log(logging.INFO, 'dvae loaded.')
-            
+
         if gpt_config_path:
             cfg = OmegaConf.load(gpt_config_path)
             gpt = GPTWrapper(**cfg).to(device).eval()
@@ -71,7 +72,7 @@ class Chat:
             gpt.load_state_dict(torch.load(gpt_ckpt_path, map_location='cpu'))
             self.pretrain_models['gpt'] = gpt
             self.logger.log(logging.INFO, 'gpt loaded.')
-            
+
         if decoder_config_path:
             cfg = OmegaConf.load(decoder_config_path)
             decoder = DVAE(**cfg).to(device).eval()
@@ -79,13 +80,24 @@ class Chat:
             decoder.load_state_dict(torch.load(decoder_ckpt_path, map_location='cpu'))
             self.pretrain_models['decoder'] = decoder
             self.logger.log(logging.INFO, 'decoder loaded.')
-        
+
         if tokenizer_path:
             tokenizer = torch.load(tokenizer_path, map_location='cpu')
             tokenizer.padding_side = 'left'
+
+            # Ensure pad_token and pad_token_id are properly set
+            if not hasattr(tokenizer, 'pad_token') or tokenizer.pad_token is None:
+                tokenizer.pad_token = '[PAD]'
+            if not hasattr(tokenizer, 'pad_token_id') or tokenizer.pad_token_id < 0:
+                if hasattr(tokenizer, 'vocab') and tokenizer.pad_token in tokenizer.vocab:
+                    tokenizer.pad_token_id = tokenizer.vocab[tokenizer.pad_token]
+                else:
+                    # Try to find a suitable ID for PAD token
+                    tokenizer.pad_token_id = 0  # Common default value
+
             self.pretrain_models['tokenizer'] = tokenizer
             self.logger.log(logging.INFO, 'tokenizer loaded.')
-            
+
         self.check_model()
     
     def inference(self, text, skip_refine_text=False, params_refine_text={}, params_infer_code={}, use_decoder=False):
