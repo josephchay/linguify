@@ -36,10 +36,52 @@ class Chat:
             self.logger.log(level, f'All initialized.')
             
         return not not_finish
-        
+
+    def transfer_models_to_own_repo(self, target_repo_id):
+        """
+        Transfer model files from the original 2Noise/ChatTTS repository to your own repository.
+
+        Args:
+            target_repo_id (str): Your Hugging Face repository ID (e.g., "your-username/ChatTTS")
+
+        Returns:
+            bool: True if transfer was successful
+        """
+        from huggingface_hub import snapshot_download, create_repo, upload_folder
+
+        # Step 1: Download from original repo
+        self.logger.log(logging.INFO, f"Downloading files from 2Noise/ChatTTS...")
+        source_download_path = snapshot_download(
+            repo_id="2Noise/ChatTTS",
+            allow_patterns=["*.pt", "*.yaml", "*.json", "config/*"]
+        )
+
+        # Step 2: Create target repo if it doesn't exist
+        self.logger.log(logging.INFO, f"Creating target repository: {target_repo_id}...")
+        try:
+            create_repo(target_repo_id, private=True)  # Set to False for public repo
+        except Exception as e:
+            self.logger.log(logging.WARNING, f"Note: {e}")
+            self.logger.log(logging.INFO, "Continuing with upload (repository might already exist)")
+
+        # Step 3: Upload files to target repo
+        self.logger.log(logging.INFO, f"Uploading files to {target_repo_id}...")
+        upload_folder(
+            folder_path=source_download_path,
+            repo_id=target_repo_id,
+            commit_message="Copy of 2Noise/ChatTTS model files"
+        )
+
+        self.logger.log(logging.INFO, f"Successfully transferred files to {target_repo_id}")
+        return True
+
     def load_models(self, source='huggingface'):
+        self.transfer_models_to_own_repo(transfer_to_own_repo)
+        # After transfer, use the new repo
+        repo_id = transfer_to_own_repo
+
         if source == 'huggingface':
-            download_path = snapshot_download(repo_id="2Noise/ChatTTS", allow_patterns=["*.pt", "*.yaml"])
+            download_path = snapshot_download(repo_id=repo_id, allow_patterns=["*.pt", "*.yaml"])
             self._load(**{k: os.path.join(download_path, v) for k, v in OmegaConf.load(os.path.join(download_path, 'config', 'path.yaml')).items()})
             
     def _load(self, vocos_config_path: str = None, vocos_ckpt_path: str = None, dvae_config_path: str = None,
