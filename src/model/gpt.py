@@ -61,10 +61,10 @@ class GPTWrapper(nn.Module):
         emb[~text_mask] = emb_code.to(emb.dtype)
         
         return emb
-    
-    def prepare_inputs_for_generation(self, input_ids, past_key_values=None, attention_mask=None, inputs_embeds=None, cache_position=None, **kwargs):
+
+    def prepare_inputs_for_generation(self, input_ids, past_key_values=None, attention_mask=None, inputs_embeds=None,
+                                      cache_position=None, **kwargs):
         # With static cache, the `past_key_values` is None
-        # TODO joao: standardize interface for the different Cache classes and remove of this if
         has_static_cache = False
         if past_key_values is None:
             past_key_values = getattr(self.gpt.layers[0].self_attn, "past_key_value", None)
@@ -72,17 +72,32 @@ class GPTWrapper(nn.Module):
 
         past_length = 0
         if past_key_values is not None:
-            if isinstance(past_key_values, Cache):
+            # Handle different cache types safely
+            if hasattr(past_key_values, "get_seq_length"):
+                # Cache has get_seq_length method
                 past_length = cache_position[0] if cache_position is not None else past_key_values.get_seq_length()
-                max_cache_length = (
-                    torch.tensor(past_key_values.get_max_length(), device=input_ids.device)
-                    if past_key_values.get_max_length() is not None
-                    else None
-                )
+                max_cache_length = None
+                if hasattr(past_key_values, "get_max_length"):
+                    max_cache_length = torch.tensor(past_key_values.get_max_length(), device=input_ids.device) \
+                        if past_key_values.get_max_length() is not None else None
                 cache_length = past_length if max_cache_length is None else torch.min(max_cache_length, past_length)
-            # TODO joao: remove this `else` after `generate` prioritizes `Cache` objects
             else:
-                cache_length = past_length = past_key_values[0][0].shape[2]
+                # For other cache types, infer length from shape
+                try:
+                    # Try to get length from the first layer's cache shape
+                    if isinstance(past_key_values, tuple):
+                        cache_length = past_length = past_key_values[0][0].shape[2]
+                    else:
+                        # For dict-based caches or other structures
+                        # Extract the first key value pair and get its shape
+                        for key, value in past_key_values.items() if hasattr(past_key_values,
+                                                                             'items') else past_key_values:
+                            if isinstance(value, tuple) and len(value) > 0:
+                                cache_length = past_length = value[0].shape[2]
+                                break
+                except (IndexError, AttributeError, TypeError):
+                    # If we can't determine the length, assume it's 0
+                    cache_length = past_length = 0
                 max_cache_length = None
 
             # Keep only the unprocessed tokens:
@@ -90,7 +105,7 @@ class GPTWrapper(nn.Module):
             # some of the inputs are exclusively passed as part of the cache (e.g. when passing input_embeds as
             # input)
             if attention_mask is not None and attention_mask.shape[1] > input_ids.shape[1]:
-                input_ids = input_ids[:, -(attention_mask.shape[1] - past_length) :]
+                input_ids = input_ids[:, -(attention_mask.shape[1] - past_length):]
             # 2 - If the past_length is smaller than input_ids', then input_ids holds all input tokens. We can discard
             # input_ids based on the past_length.
             elif past_length < input_ids.shape[1]:
@@ -98,7 +113,8 @@ class GPTWrapper(nn.Module):
             # 3 - Otherwise (past_length >= input_ids.shape[1]), let's assume input_ids only has unprocessed tokens.
 
             # If we are about to go beyond the maximum cache length, we need to crop the input attention mask.
-            if max_cache_length is not None and attention_mask is not None and cache_length + input_ids.shape[1] > max_cache_length:
+            if max_cache_length is not None and attention_mask is not None and cache_length + input_ids.shape[
+                1] > max_cache_length:
                 attention_mask = attention_mask[:, -max_cache_length:]
 
         position_ids = kwargs.get("position_ids", None)
@@ -107,15 +123,13 @@ class GPTWrapper(nn.Module):
             position_ids = attention_mask.long().cumsum(-1) - 1
             position_ids.masked_fill_(attention_mask == 0, 1)
             if past_key_values:
-                position_ids = position_ids[:, -input_ids.shape[1] :]
+                position_ids = position_ids[:, -input_ids.shape[1]:]
 
         # if `inputs_embeds` are passed, we only want to use them in the 1st generation step
         if inputs_embeds is not None and past_key_values is None:
             model_inputs = {"inputs_embeds": inputs_embeds}
         else:
-            # The `contiguous()` here is necessary to have a static stride during decoding. torchdynamo otherwise
-            # recompiles graphs as the stride of the inputs is a guard. Ref: https://github.com/huggingface/transformers/pull/29114
-            # TODO: use `next_tokens` directly instead.
+            # The `contiguous()` here is necessary to have a static stride during decoding.
             model_inputs = {"input_ids": input_ids.contiguous()}
 
         input_length = position_ids.shape[-1] if position_ids is not None else input_ids.shape[-1]
