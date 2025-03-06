@@ -76,9 +76,8 @@ class Chat:
         return True
 
     def load_models(self, source='huggingface'):
-        self.transfer_models_to_own_repo(transfer_to_own_repo)
-        # After transfer, use the new repo
-        repo_id = transfer_to_own_repo
+        repo_id = 'josephchay/LinguifyTTS'
+        self.transfer_models_to_own_repo(repo_id)
 
         if source == 'huggingface':
             download_path = snapshot_download(repo_id=repo_id, allow_patterns=["*.pt", "*.yaml"])
