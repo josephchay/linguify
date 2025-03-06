@@ -83,6 +83,15 @@ class Chat:
         if tokenizer_path:
             tokenizer = torch.load(tokenizer_path, map_location='cpu')
             tokenizer.padding_side = 'left'
+
+            if not hasattr(tokenizer, 'pad_token') or tokenizer.pad_token is None:
+                tokenizer.pad_token = '[PAD]'
+            if not hasattr(tokenizer, 'pad_token_id') or tokenizer.pad_token_id < 0:
+                if hasattr(tokenizer, 'vocab') and tokenizer.pad_token in tokenizer.vocab:
+                    tokenizer.pad_token_id = tokenizer.vocab[tokenizer.pad_token]
+                else:
+                    tokenizer.pad_token_id = 0  # Default value
+
             self.pretrain_models['tokenizer'] = tokenizer
             self.logger.log(logging.INFO, 'tokenizer loaded.')
             
