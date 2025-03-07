@@ -10,7 +10,7 @@ from .model.gpt import GPTWrapper
 from .utils.gpu_utils import select_device
 from .inference.api import refine_text, inference_code
 
-logging.basicConfig(level = logging.INFO)
+logging.basicConfig(level=logging.INFO)
 
 
 class Chat:
