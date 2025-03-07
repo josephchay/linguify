@@ -23,7 +23,7 @@ prompt_dict = {
 }
 
 
-class HuggingFaceLLMApi:
+class LLMApi:
     def __init__(self, model_name="deepseek-ai/deepseek-llm-7b-chat", device=None):
         if device is None:
             self.device = "cuda" if torch.cuda.is_available() else "cpu"
