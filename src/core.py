@@ -39,7 +39,7 @@ class Chat:
 
     def load_models(self, source='huggingface'):
         if source == 'huggingface':
-            download_path = snapshot_download(repo_id='josephchay/LinguifyTTS', allow_patterns=["*.pt", "*.yaml"])
+            download_path = snapshot_download(repo_id='josephchay/LinguifySpeech', allow_patterns=["*.pt", "*.yaml"])
             self._load(**{k: os.path.join(download_path, v) for k, v in OmegaConf.load(os.path.join(download_path, 'config', 'path.yaml')).items()})
 
     def _load(self, vocos_config_path: str = None, vocos_ckpt_path: str = None, dvae_config_path: str = None,
