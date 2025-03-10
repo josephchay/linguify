@@ -16,7 +16,7 @@ logging.basicConfig(level=logging.INFO)
 
 
 class Chat:
-    def __init__(self, ):
+    def __init__(self):
         self.pretrain_models = {}
         self.logger = logging.getLogger(__name__)
 
@@ -80,10 +80,13 @@ class Chat:
 
         if gpt_config_path:
             cfg = OmegaConf.load(gpt_config_path)
-            gpt = GPT_warpper(**cfg).to(device).eval()
+            gpt = GPTWrapper(**cfg).to(device).eval()
             assert gpt_ckpt_path, 'gpt_ckpt_path should not be None'
             gpt.load_state_dict(torch.load(gpt_ckpt_path, map_location='cpu'))
             self.pretrain_models['gpt'] = gpt
+            spk_stat_path = os.path.join(os.path.dirname(gpt_ckpt_path), 'spk_stat.pt')
+            assert os.path.exists(spk_stat_path), f'Missing spk_stat.pt: {spk_stat_path}'
+            self.pretrain_models['spk_stat'] = torch.load(spk_stat_path).to(device)
             self.logger.log(logging.INFO, 'gpt loaded.')
 
         if decoder_config_path:
@@ -125,3 +128,8 @@ class Chat:
         wav = [self.pretrain_models['vocos'].decode(i).cpu().numpy() for i in mel_spec]
 
         return wav
+
+    def sample_random_speaker(self):
+        dim = self.pretrain_models['gpt'].gpt.layers[0].mlp.gate_proj.in_features
+        std, mean = self.pretrain_models['spk_stat'].chunk(2)
+        return torch.randn(dim, device=std.device) * std + mean
