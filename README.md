@@ -109,3 +109,7 @@ Audio(wav[0], rate=24_000)
   - `temperature`: Controls randomness in generation (lower = more deterministic)
 - `params_refine_text`: Dictionary of parameters for text refinement
   - `prompt`: Special tags that can modify speech style
+
+## Updates
+
+Refer to the [CHANGELOG](CHANGELOG.md) file for the thorough latest updates and features.
