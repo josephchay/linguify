@@ -17,6 +17,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Add `local_path` system and `force_redownload` parameter to the `load_models` method.
 - New `refine_text_only` parameter to the `inference` method of `Chat` class.
 - `sample_random_speaker` method to sample a random speaker from the dataset.
+- UI for the inference pipeline demonstration.
 
 ### Changed
 

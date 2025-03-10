@@ -105,8 +105,8 @@ class Chat:
 
         self.check_model()
 
-    def infer(self, text, skip_refine_text=False, refine_text_only=False, params_refine_text={},
-              params_infer_code={}, use_decoder=False):
+    def inference(self, text, skip_refine_text=False, refine_text_only=False, params_refine_text={},
+                  params_infer_code={}, use_decoder=False):
         assert self.check_model(use_decoder=use_decoder)
 
         if not skip_refine_text:
