@@ -14,11 +14,11 @@ logging.basicConfig(level = logging.INFO)
 
 
 class Chat:
-    def __init__(self, ):
+    def __init__(self):
         self.pretrain_models = {}
         self.logger = logging.getLogger(__name__)
         
-    def check_model(self, level = logging.INFO, use_decoder = False):
+    def check_model(self, level=logging.INFO, use_decoder=False):
         not_finish = False
         check_list = ['vocos', 'gpt', 'tokenizer']
         
