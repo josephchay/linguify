@@ -20,6 +20,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - UI for the inference pipeline demonstration.
 - Changed the random speaker sampling the `generate_audio` method to use `sample_random_speaker`.
 
+### Fixed
+
+- Ensure that the `pad_token` and `pad_token_id` are properly set when the tokenizer is loaded.
+
 ### Changed
 
 - Ensure that `pad_token` and `pad_token_id` properly set when the tokenizer is loaded.
