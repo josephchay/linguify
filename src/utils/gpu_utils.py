@@ -2,7 +2,7 @@ import torch
 import logging
 
 
-def select_device(min_memory = 2048):
+def select_device(min_memory=2048):
     logger = logging.getLogger(__name__)
     if torch.cuda.is_available():
         available_gpus = []
@@ -19,5 +19,5 @@ def select_device(min_memory = 2048):
     else:
         logger.log(logging.WARNING, f'No GPU found, use CPU instead')
         device = torch.device('cpu')
-    
+
     return device

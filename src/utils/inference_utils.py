@@ -15,8 +15,8 @@ class CustomRepetitionPenaltyLogitsProcessorRepeat:
         input_ids = input_ids[:, -self.past_window:]
         freq = F.one_hot(input_ids, scores.size(1)).sum(1)
         freq[self.max_input_ids:] = 0
-        alpha = self.penalty**freq
-        scores = torch.where(scores < 0, scores*alpha, scores/alpha)
+        alpha = self.penalty ** freq
+        scores = torch.where(scores < 0, scores * alpha, scores / alpha)
 
         return scores
 
@@ -35,7 +35,7 @@ class CustomRepetitionPenaltyLogitsProcessor:
         score = torch.gather(scores, 1, input_ids)
         _score = score.detach().clone()
         score = torch.where(score < 0, score * self.penalty, score / self.penalty)
-        score[input_ids>=self.max_input_ids] = _score[input_ids>=self.max_input_ids]
+        score[input_ids >= self.max_input_ids] = _score[input_ids >= self.max_input_ids]
         scores.scatter_(1, input_ids, score)
-        
+
         return scores
