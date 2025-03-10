@@ -13,6 +13,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - `requirements.txt` and `setup.py` files.
 - Handle different cache types under the `prepare_inputs_for_generation` method.
 - Add `inference.ipynb` notebook to demonstrate usage of the inference pipeline.
+- New utility functions for IO.
+- Add `local_path` system and `force_redownload` parameter to the `load_models` method.
+- New `refine_text_only` parameter to the `inference` method of `Chat` class.
 
 ### Changed
 

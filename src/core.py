@@ -1,14 +1,16 @@
 import os
 import logging
 from omegaconf import OmegaConf
+from huggingface_hub import snapshot_download
 import torch
 from vocos import Vocos
-from huggingface_hub import snapshot_download
 
 from .model.dvae import DVAE
 from .model.gpt import GPTWrapper
 from .utils.gpu_utils import select_device
+from .utils.io_utils import get_latest_modified_file
 from .inference.api import refine_text, inference_code
+
 
 logging.basicConfig(level=logging.INFO)
 
@@ -37,16 +39,26 @@ class Chat:
 
         return not not_finish
 
-    def load_models(self, source='huggingface'):
+    def load_models(self, source='huggingface', force_redownload=False, local_path='<LOCAL_PATH>'):
         if source == 'huggingface':
-            download_path = snapshot_download(repo_id='josephchay/LinguifySpeech', allow_patterns=["*.pt", "*.yaml"])
-            self._load(**{k: os.path.join(download_path, v) for k, v in
-                          OmegaConf.load(os.path.join(download_path, 'config', 'path.yaml')).items()})
+            hf_home = os.getenv('HF_HOME', os.path.expanduser("~/.cache/huggingface"))
+            try:
+                download_path = get_latest_modified_file(os.path.join(hf_home, 'hub/models--josephchay--LinguifySpeech/snapshots'))
+            except:
+                download_path = None
+            if download_path is None or force_redownload:
+                self.logger.log(logging.INFO, f'Download from HF: https://huggingface.co/josephchay/LinguifySpeech')
+                download_path = snapshot_download(repo_id="josephchay/LinguifySpeech", allow_patterns=["*.pt", "*.yaml"])
+            else:
+                self.logger.log(logging.INFO, f'Load from cache: {download_path}')
+            self._load(**{k: os.path.join(download_path, v) for k, v in OmegaConf.load(os.path.join(download_path, 'config', 'path.yaml')).items()})
+        elif source == 'local':
+            self.logger.log(logging.INFO, f'Load from local: {local_path}')
+            self._load(**{k: os.path.join(local_path, v) for k, v in OmegaConf.load(os.path.join(local_path, 'config', 'path.yaml')).items()})
 
     def _load(self, vocos_config_path: str = None, vocos_ckpt_path: str = None, dvae_config_path: str = None,
               dvae_ckpt_path: str = None, gpt_config_path: str = None, gpt_ckpt_path: str = None,
-              decoder_config_path: str = None, decoder_ckpt_path: str = None, tokenizer_path: str = None,
-              device: str = None):
+              decoder_config_path: str = None, decoder_ckpt_path: str = None, tokenizer_path: str = None, device: str = None):
         if not device:
             device = select_device(4096)
             self.logger.log(logging.INFO, f'use {device}')
@@ -68,7 +80,7 @@ class Chat:
 
         if gpt_config_path:
             cfg = OmegaConf.load(gpt_config_path)
-            gpt = GPTWrapper(**cfg).to(device).eval()
+            gpt = GPT_warpper(**cfg).to(device).eval()
             assert gpt_ckpt_path, 'gpt_ckpt_path should not be None'
             gpt.load_state_dict(torch.load(gpt_ckpt_path, map_location='cpu'))
             self.pretrain_models['gpt'] = gpt
@@ -85,32 +97,31 @@ class Chat:
         if tokenizer_path:
             tokenizer = torch.load(tokenizer_path, map_location='cpu')
             tokenizer.padding_side = 'left'
-
-            # Ensure pad_token and pad_token_id are properly set
-            if not hasattr(tokenizer, 'pad_token') or tokenizer.pad_token is None:
-                tokenizer.pad_token = '[PAD]'
-            if not hasattr(tokenizer, 'pad_token_id') or tokenizer.pad_token_id < 0:
-                if hasattr(tokenizer, 'vocab') and tokenizer.pad_token in tokenizer.vocab:
-                    tokenizer.pad_token_id = tokenizer.vocab[tokenizer.pad_token]
-                else:
-                    # Try to find a suitable ID for PAD token
-                    tokenizer.pad_token_id = 0  # Common default value
-
             self.pretrain_models['tokenizer'] = tokenizer
             self.logger.log(logging.INFO, 'tokenizer loaded.')
 
         self.check_model()
 
-    def inference(self, text, skip_refine_text=False, params_refine_text={}, params_infer_code={}, use_decoder=False):
+    def infer(self, text, skip_refine_text=False, refine_text_only=False, params_refine_text={},
+              params_infer_code={}, use_decoder=False):
         assert self.check_model(use_decoder=use_decoder)
+
         if not skip_refine_text:
             text_tokens = refine_text(self.pretrain_models, text, **params_refine_text)['ids']
-            text_tokens = [i[i < self.pretrain_models['tokenizer'].convert_tokens_to_ids('[break_0]')] for i in text_tokens]
+            text_tokens = [i[i < self.pretrain_models['tokenizer'].convert_tokens_to_ids('[break_0]')] for i in
+                           text_tokens]
             text = self.pretrain_models['tokenizer'].batch_decode(text_tokens)
+            if refine_text_only:
+                return text
+
+        text = [params_infer_code.get('prompt', '') + i for i in text]
+        params_infer_code.pop('prompt', '')
         result = inference_code(self.pretrain_models, text, **params_infer_code, return_hidden=use_decoder)
+
         if use_decoder:
             mel_spec = [self.pretrain_models['decoder'](i[None].permute(0, 2, 1)) for i in result['hiddens']]
         else:
             mel_spec = [self.pretrain_models['dvae'](i[None].permute(0, 2, 1)) for i in result['ids']]
         wav = [self.pretrain_models['vocos'].decode(i).cpu().numpy() for i in mel_spec]
+
         return wav
