@@ -12,6 +12,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - initial inference pipeline
 - `requirements.txt` and `setup.py` files.
 - Handle different cache types under the `prepare_inputs_for_generation` method.
+- Add `inference.ipynb` notebook to demonstrate usage of the inference pipeline.
 
 ### Changed
 
