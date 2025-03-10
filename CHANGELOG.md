@@ -18,6 +18,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - New `refine_text_only` parameter to the `inference` method of `Chat` class.
 - `sample_random_speaker` method to sample a random speaker from the dataset.
 - UI for the inference pipeline demonstration.
+- Changed the random speaker sampling the `generate_audio` method to use `sample_random_speaker`.
 
 ### Changed
 
