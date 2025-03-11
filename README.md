@@ -110,6 +110,27 @@ Audio(wav[0], rate=24_000)
 - `params_refine_text`: Dictionary of parameters for text refinement
   - `prompt`: Special tags that can modify speech style
 
+## Sample Audio Outputs
+
+Prompt: "Pharmacokinetic analysis indicates that the prescribed medication reaches peak plasma concentration within two hours, 
+with a half-life of approximately eight hours, necessitating bi-daily administration."
+
+<audio controls>
+  <source src="assets/audio_wav_output.wav" type="audio/wav">
+  Your browser does not support the audio element.
+</audio>
+
+The audio output above not only demonstrates natural-sounding speech but also showcases the system's ability to 
+handle complex medical terminology with ease, as well as pronouncing them all in a very rich tone.
+
+<audio controls>
+  <source src="assets/audio_wav_output2.wav" type="audio/wav">
+  Your browser does not support the audio element.
+</audio>
+
+Prompt: Medical advancements in AI-driven diagnostics have significantly improved early cancer detection. 
+Techniques such as liquid biopsy and deep-learning-based imaging analysis enhance accuracy and patient outcomes.
+
 ## Updates
 
 Refer to the [CHANGELOG](CHANGELOG.md) file for the thorough latest updates and features.
