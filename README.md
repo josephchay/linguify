@@ -115,18 +115,12 @@ Audio(wav[0], rate=24_000)
 Prompt: "Pharmacokinetic analysis indicates that the prescribed medication reaches peak plasma concentration within two hours, 
 with a half-life of approximately eight hours, necessitating bi-daily administration."
 
-<audio controls>
-  <source src="assets/audio_wav_output.wav" type="audio/wav">
-  Your browser does not support the audio element.
-</audio>
+https://github.com/user-attachments/assets/b75f3872-6861-45dd-a109-39394b0f72d9
 
 The audio output above not only demonstrates natural-sounding speech but also showcases the system's ability to 
-handle complex medical terminology with ease, as well as pronouncing them all in a very rich tone.
+handle complex medical terminology with ease, as well as pronouncing them all in a very rich tone, with strong pause-like smoothing slurs.
 
-<audio controls>
-  <source src="assets/audio_wav_output2.wav" type="audio/wav">
-  Your browser does not support the audio element.
-</audio>
+https://github.com/user-attachments/assets/2cbeb712-a20a-47ee-957b-7b142652fa7d
 
 Prompt: Medical advancements in AI-driven diagnostics have significantly improved early cancer detection. 
 Techniques such as liquid biopsy and deep-learning-based imaging analysis enhance accuracy and patient outcomes.
