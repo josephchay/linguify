@@ -25,6 +25,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Text normalization with `nemo_text_processing`
 - Language detection.
 - Default speed for inference.
+- New notebook script for more detailed inference demonstration.
+- `torch` dependency in `requirements.txt`.
+- `IPython` dependency in `requirements.txt`.
+- Text Normalization for both Chinese and English text.
+- `extended_inference.ipynb` notebook for more detailed inference demonstration.
 
 ### Fixed
 

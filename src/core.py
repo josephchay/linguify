@@ -1,5 +1,6 @@
 import os
 import logging
+from functools import partial
 from omegaconf import OmegaConf
 from huggingface_hub import snapshot_download
 import torch
@@ -7,7 +8,7 @@ from vocos import Vocos
 
 from .model.dvae import DVAE
 from .model.gpt import GPTWrapper
-from .utils.inference_utils import count_invalid_characters, detect_language
+from .utils.inference_utils import count_invalid_characters, detect_language, apply_character_map, apply_half2full_map
 from .utils.gpu_utils import select_device
 from .utils.io_utils import get_latest_modified_file
 from .inference.api import refine_text, inference_code
@@ -121,7 +122,7 @@ class Chat:
         self.check_model()
 
     def inference(self, text, skip_refine_text=False, refine_text_only=False, params_refine_text={},
-                  params_infer_code={'prompt':'[speed_5]'}, use_decoder=True, do_text_normalization=False, lang=None):
+                  params_infer_code={'prompt':'[speed_5]'}, use_decoder=True, do_text_normalization=True, lang=None):
         assert self.check_model(use_decoder=use_decoder)
 
         if not isinstance(text, list):
@@ -132,11 +133,16 @@ class Chat:
                 _lang = detect_language(t) if lang is None else lang
                 self.init_normalizer(_lang)
                 text[i] = self.normalizer[_lang].normalize(t, verbose=False, punct_post_process=True)
+                text[i] = self.normalizer[_lang](t)
 
-        for i in text:
+                if _lang == 'zh':
+                    text[i] = apply_half2full_map(text[i])
+
+        for i, t in enumerate(text):
             invalid_characters = count_invalid_characters(i)
             if len(invalid_characters):
                 self.logger.log(logging.WARNING, f'Invalid characters found! : {invalid_characters}')
+                text[i] = apply_character_map(t)
 
         if not skip_refine_text:
             text_tokens = refine_text(self.pretrain_models, text, **params_refine_text)['ids']
@@ -166,3 +172,18 @@ class Chat:
         if lang not in self.normalizer:
             from nemo_text_processing.text_normalization.normalize import Normalizer
             self.normalizer[lang] = Normalizer(input_case='cased', lang=lang)
+
+            if lang == 'zh':
+                 try:
+                     from tn.chinese.normalizer import Normalizer
+                 except:
+                     self.logger.log(logging.WARNING, f'Package WeTextProcessing not found! \
+                         Run: conda install -c conda-forge pynini=2.1.5 && pip install WeTextProcessing')
+                 self.normalizer[lang] = Normalizer().normalize
+            else:
+                 try:
+                     from nemo_text_processing.text_normalization.normalize import Normalizer
+                 except:
+                     self.logger.log(logging.WARNING, f'Package nemo_text_processing not found! \
+                         Run: conda install -c conda-forge pynini=2.1.5 && pip install nemo_text_processing')
+             self.normalizer[lang] = partial(Normalizer(input_case='cased', lang=lang).normalize, verbose=False, punct_post_process=True)

@@ -107,10 +107,10 @@ texts = [
      "Further correlation with clinical history and CSF analysis was recommended."),
 
     # Extensive and Detailed (In Depth Medical Descriptions)
-    ("Acute coronary syndrome, abbreviated as ACS, presents with a spectrum "
-     "of conditions ranging from unstable angina to ST elevation myocardial infarction. "
+    ("Acute coronary syndrome, presents with a spectrum "
+     "of conditions ranging from unstable angina to Segment T elevation myocardial infarction. "
      "Management involves prompt initiation of dual antiplatelet therapy "
-     "using aspirin and a P2Y12 inhibitor, alongside anticoagulation "
+     "using aspirin and an inhibitor, alongside anticoagulation "
      "with heparin or enoxaparin."),
     ("Sepsis is a life threatening condition characterized by systemic inflammation "
      "and organ dysfunction triggered by infection. "

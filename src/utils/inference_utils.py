@@ -3,6 +3,83 @@ import torch
 import torch.nn.functional as F
 
 
+character_map = {
+    '：': '，',
+    '；': '，',
+    '！': '。',
+    '（': '，',
+    '）': '，',
+    '【': '，',
+    '】': '，',
+    '『': '，',
+    '』': '，',
+    '「': '，',
+    '」': '，',
+    '《': '，',
+    '》': '，',
+    '－': '，',
+    '‘': '',
+    '“': '',
+    '’': '',
+    '”': '',
+    ':': ',',
+    ';': ',',
+    '!': '.',
+    '(': ',',
+    ')': ',',
+    '[': ',',
+    ']': ',',
+    '>': ',',
+    '<': ',',
+    '-': ',',
+}
+
+halfwidth_2_fullwidth_map = {
+    '!': '！',
+    '"': '“',
+    "'": '‘',
+    '#': '＃',
+    '$': '＄',
+    '%': '％',
+    '&': '＆',
+    '(': '（',
+    ')': '）',
+    ',': '，',
+    '-': '－',
+    '*': '＊',
+    '+': '＋',
+    '.': '。',
+    '/': '／',
+    ':': '：',
+    ';': '；',
+    '<': '＜',
+    '=': '＝',
+    '>': '＞',
+    '?': '？',
+    '@': '＠',
+    '[': '［',
+    '\\': '＼',
+    ']': '］',
+    '^': '＾',
+    '_': '＿',
+    '`': '｀',
+    '{': '｛',
+    '|': '｜',
+    '}': '｝',
+    '~': '～'
+}
+
+
+def apply_half2full_map(text):
+    translation_table = str.maketrans(halfwidth_2_fullwidth_map)
+    return text.translate(translation_table)
+
+
+def apply_character_map(text):
+    translation_table = str.maketrans(character_map)
+    return text.translate(translation_table)
+
+
 class CustomRepetitionPenaltyLogitsProcessorRepeat:
     def __init__(self, penalty: float, max_input_ids, past_window):
         if not isinstance(penalty, float) or not (penalty > 0):
