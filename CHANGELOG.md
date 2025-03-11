@@ -21,10 +21,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Changed the random speaker sampling the `generate_audio` method to use `sample_random_speaker`.
 - Sample audio output assets in the new `assets` directory.
 - `Sample Audio Outputs` section in the `README.md` file.
+- Check for any invalid characters found in the given input text during inference.
+- Text normalization with `nemo_text_processing`
+- Language detection.
+- Default speed for inference.
 
 ### Fixed
 
 - Ensure that the `pad_token` and `pad_token_id` are properly set when the tokenizer is loaded.
+- Ensure text passed for inference is always in a list.
 
 ### Changed
 
