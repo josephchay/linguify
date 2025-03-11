@@ -35,6 +35,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - Ensure that the `pad_token` and `pad_token_id` are properly set when the tokenizer is loaded.
 - Ensure text passed for inference is always in a list.
+- Indentation error in the `Chat::init_normalizer` method.
 
 ### Changed
 

@@ -174,16 +174,17 @@ class Chat:
             self.normalizer[lang] = Normalizer(input_case='cased', lang=lang)
 
             if lang == 'zh':
-                 try:
-                     from tn.chinese.normalizer import Normalizer
-                 except:
-                     self.logger.log(logging.WARNING, f'Package WeTextProcessing not found! \
-                         Run: conda install -c conda-forge pynini=2.1.5 && pip install WeTextProcessing')
-                 self.normalizer[lang] = Normalizer().normalize
+                try:
+                    from tn.chinese.normalizer import Normalizer
+                except:
+                    self.logger.log(logging.WARNING, f'Package WeTextProcessing not found! '
+                                                     f'Run: conda install -c conda-forge pynini=2.1.5 && pip install WeTextProcessing')
+                self.normalizer[lang] = Normalizer().normalize
             else:
-                 try:
-                     from nemo_text_processing.text_normalization.normalize import Normalizer
-                 except:
-                     self.logger.log(logging.WARNING, f'Package nemo_text_processing not found! \
-                         Run: conda install -c conda-forge pynini=2.1.5 && pip install nemo_text_processing')
-             self.normalizer[lang] = partial(Normalizer(input_case='cased', lang=lang).normalize, verbose=False, punct_post_process=True)
+                try:
+                    from nemo_text_processing.text_normalization.normalize import Normalizer
+                except:
+                    self.logger.log(logging.WARNING, f'Package nemo_text_processing not found! '
+                                                     f'Run: conda install -c conda-forge pynini=2.1.5 && pip install nemo_text_processing')
+            self.normalizer[lang] = partial(Normalizer(input_case='cased', lang=lang).normalize, verbose=False,
+                                            punct_post_process=True)

@@ -54,6 +54,7 @@ chat.load_models(compile=False)  # Set to True for better performance
 
 > [!NOTE]
 > The model is also trained on generic information and can generate speech of equal quality for common topics.
+> 
 > _Regarding textual abbreviation, each of them should be presented with spaced-out characters to ensure clarity and accurate interpretation._
 
 ```python
@@ -78,7 +79,7 @@ from IPython.display import Audio
 Audio(wavs[0], rate=24_000)
 ```
 
-### Advanced Usage
+## Advanced Usage
 
 ```python
 # Sample a speaker from Gaussian.
@@ -106,7 +107,7 @@ wav = chat.inference(text, skip_refine_text=True, params_refine_text=params_refi
 torchaudio.save("audio_output2.wav", torch.from_numpy(wavs[0]), 24000)
 ```
 
-### Example Usage
+## Example Usage
 
 ```python
 inputs_en = """
@@ -126,16 +127,6 @@ params_refine_text = {
 audio_array_en = chat.inference(inputs_en, params_refine_text=params_refine_text)
 torchaudio.save("audio_output3.wav", torch.from_numpy(audio_array_en[0]), 24000)
 ```
-
-## Parameters
-
-- `use_decoder=True`: Uses a higher quality decoder for better results
-- `skip_refine_text=True`: Skips the LLM-based text refinement step
-- `params_infer_code`: Dictionary of parameters for the inference process
-  - `spk_emb`: Speaker embedding for voice characteristics
-  - `temperature`: Controls randomness in generation (lower = more deterministic)
-- `params_refine_text`: Dictionary of parameters for text refinement
-  - `prompt`: Special tags that can modify speech style
 
 ## Sample Audio Outputs
 
