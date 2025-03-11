@@ -58,11 +58,11 @@ chat.load_models()  # This will download models from Hugging Face
 texts = [
     # Generic (Mildly Medical)
     ("Welcome to the LinguifySpeech TTS system. "
-     "This converts text to natural-sounding speech."),
+     "This converts text to natural sounding speech."),
     ("Please ensure you take your medication "
      "as prescribed by your healthcare provider."),
-    ("Regular exercise and a balanced diet are crucial "
-     "for maintaining heart health."),
+    ("Regular exercise and a balanced diet "
+     "are crucial for maintaining heart health."),
     ("In case of a fever, it’s important to stay hydrated "
      "and monitor your temperature."),
     ("If you experience persistent headaches, fatigue, or dizziness, "
@@ -72,43 +72,54 @@ texts = [
     ("Patients diagnosed with Type 2 diabetes are advised to monitor "
      "their blood glucose levels regularly, maintain a low glycemic index diet, "
      "and follow their physician's guidance on insulin or oral hypoglycemic medications."),
-    ("Post-operative care involves wound inspection, dressing changes, and pain management. "
-     "Patients should avoid heavy lifting, keep the incision site dry unless instructed otherwise, "
+    ("Post operative care involves wound inspection, dressing changes, "
+     "and pain management. Patients should avoid heavy lifting, "
+     "keep the incision site dry unless instructed otherwise, "
      "and report signs of infection such as redness, swelling, or discharge."),
     ("Individuals with hypertension should avoid excessive sodium intake, "
-     "engage in regular physical activity, and adopt stress-reducing techniques "
-     "such as meditation or mindfulness exercises. Monitoring blood pressure at home "
-     "is recommended to track progress and ensure stability."),
-    ("Asthma management requires identifying triggers, following a prescribed inhaler routine, "
-     "and seeking emergency care if symptoms escalate. Inhaled corticosteroids and bronchodilators "
-     "are often key components in long-term management plans."),
+     "engage in regular physical activity, and adopt stress reducing techniques "
+     "such as meditation or mindfulness exercises. "
+     "Monitoring blood pressure at home is recommended to track progress "
+     "and ensure stability."),
+    ("Asthma management requires identifying triggers, "
+     "following a prescribed inhaler routine, "
+     "and seeking emergency care if symptoms escalate. "
+     "Inhaled corticosteroids and bronchodilators are often key components "
+     "in long term management plans."),
 
     # Highly Detailed (Medical Jargon/Technical)
-    ("Beta-adrenergic antagonists, commonly known as beta-blockers, function by "
-     "competitively inhibiting the binding of catecholamines to beta-adrenergic receptors. "
-     "This leads to decreased myocardial contractility, reduced heart rate, and diminished "
-     "oxygen consumption, making them essential in the management of ischemic heart disease, "
-     "chronic heart failure, and post-myocardial infarction care."),
+    ("Beta adrenergic antagonists, commonly known as beta blockers, "
+     "function by competitively inhibiting the binding of catecholamines "
+     "to beta adrenergic receptors. "
+     "This leads to decreased myocardial contractility, reduced heart rate, "
+     "and diminished oxygen consumption, making them essential in "
+     "the management of ischemic heart disease, chronic heart failure, "
+     "and post myocardial infarction care."),
     ("The patient presented with tachycardia, diaphoresis, and altered mentation, "
-     "indicative of possible hypoglycemic crisis. Immediate intervention included "
-     "administration of 50% dextrose solution intravenously, followed by continuous glucose "
-     "monitoring to stabilize serum glucose levels."),
-    ("Magnetic resonance imaging (MRI) revealed a T2-weighted hyperintense lesion "
-     "in the left parietal lobe, consistent with gliosis. The differential diagnosis included "
-     "post-ischemic changes, demyelinating pathology, or an old vascular insult. "
+     "indicative of possible hypoglycemic crisis. "
+     "Immediate intervention included administration of 50 percent dextrose "
+     "solution intravenously, followed by continuous glucose monitoring "
+     "to stabilize serum glucose levels."),
+    ("Magnetic resonance imaging, commonly called MRI, revealed a T2 weighted "
+     "hyperintense lesion in the left parietal lobe, consistent with gliosis. "
+     "The differential diagnosis included post ischemic changes, "
+     "demyelinating pathology, or an old vascular insult. "
      "Further correlation with clinical history and CSF analysis was recommended."),
 
-    # Extensive and Detailed (In-Depth Medical Descriptions)
-    ("Acute coronary syndrome (ACS) presents with a spectrum of conditions ranging from "
-     "unstable angina to ST-elevation myocardial infarction (STEMI). Management involves "
-     "prompt initiation of dual antiplatelet therapy (DAPT) using aspirin and a P2Y12 inhibitor, "
-     "alongside anticoagulation with heparin or enoxaparin."),
-    ("Sepsis is a life-threatening condition characterized by systemic inflammation and "
-     "organ dysfunction triggered by infection. The Surviving Sepsis Campaign recommends "
-     "initiating broad-spectrum antibiotics within one hour of suspected sepsis, alongside "
-     "aggressive fluid resuscitation with crystalloids. Vasopressor support, particularly "
-     "norepinephrine, is indicated if mean arterial pressure (MAP) remains below 65 mmHg "
-     "despite adequate fluid administration."),
+    # Extensive and Detailed (In Depth Medical Descriptions)
+    ("Acute coronary syndrome, abbreviated as ACS, presents with a spectrum "
+     "of conditions ranging from unstable angina to ST elevation myocardial infarction. "
+     "Management involves prompt initiation of dual antiplatelet therapy "
+     "using aspirin and a P2Y12 inhibitor, alongside anticoagulation "
+     "with heparin or enoxaparin."),
+    ("Sepsis is a life threatening condition characterized by systemic inflammation "
+     "and organ dysfunction triggered by infection. "
+     "The Surviving Sepsis Campaign recommends initiating broad spectrum antibiotics "
+     "within one hour of suspected sepsis, alongside aggressive fluid resuscitation "
+     "with crystalloids. "
+     "Vasopressor support, particularly norepinephrine, is indicated "
+     "if mean arterial pressure, abbreviated as MAP, remains below 65 millimeters "
+     "of mercury despite adequate fluid administration."),
 ]
 
 # Generate speech
