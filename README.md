@@ -50,7 +50,8 @@ chat.load_models()  # This will download models from Hugging Face
 
 ### Generate speech with default settings
 
-> [!NOTE] The model is also trained on generic information and can generate speech of equal quality for common topics.
+> [!NOTE]
+> The model is also trained on generic information and can generate speech of equal quality for common topics.
 
 ```python
 # Prepare your text

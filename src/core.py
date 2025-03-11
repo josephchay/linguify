@@ -121,7 +121,7 @@ class Chat:
         self.check_model()
 
     def inference(self, text, skip_refine_text=False, refine_text_only=False, params_refine_text={},
-                  params_infer_code={'prompt':'[speed_5]'}, use_decoder=True, do_text_normalization=True, lang=None):
+                  params_infer_code={'prompt':'[speed_5]'}, use_decoder=True, do_text_normalization=False, lang=None):
         assert self.check_model(use_decoder=use_decoder)
 
         if not isinstance(text, list):

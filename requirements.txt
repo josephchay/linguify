@@ -4,6 +4,5 @@ einops==0.8.1
 vector_quantize_pytorch==1.21.9
 tqdm==4.66.5
 vocos==0.1.0
-huggingface_hub==0.26.3
+huggingface_hub==0.28.1
 gradio==5.20.1
-nemo_text_processing==1.1.0
