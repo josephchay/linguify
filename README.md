@@ -112,16 +112,22 @@ Audio(wav[0], rate=24_000)
 
 ## Sample Audio Outputs
 
-Prompt: "Pharmacokinetic analysis indicates that the prescribed medication reaches peak plasma concentration within two hours, 
+Prompt: 
+
+"Pharmacokinetic analysis indicates that the prescribed medication reaches peak plasma concentration within two hours, 
 with a half-life of approximately eight hours, necessitating bi-daily administration."
 
 Output:
+
 https://github.com/user-attachments/assets/b75f3872-6861-45dd-a109-39394b0f72d9
 
-Prompt: Medical advancements in AI-driven diagnostics have significantly improved early cancer detection. 
-Techniques such as liquid biopsy and deep-learning-based imaging analysis enhance accuracy and patient outcomes.
+Prompt: 
+
+"Medical advancements in AI-driven diagnostics have significantly improved early cancer detection. 
+Techniques such as liquid biopsy and deep-learning-based imaging analysis enhance accuracy and patient outcomes."
 
 Output:
+
 https://github.com/user-attachments/assets/2cbeb712-a20a-47ee-957b-7b142652fa7d
 
 The audio outputs above not only demonstrate natural-sounding speech but also showcase the system's ability to 
