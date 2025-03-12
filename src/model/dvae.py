@@ -114,9 +114,7 @@ class DVAEDecoder(nn.Module):
 
 
 class DVAE(nn.Module):
-    def __init__(
-            self, decoder_config, vq_config, dim=512
-    ):
+    def __init__(self, decoder_config, vq_config, dim=512):
         super().__init__()
         self.register_buffer('coef', torch.randn(1, 100, 1))
 
@@ -128,7 +126,6 @@ class DVAE(nn.Module):
             self.vq_layer = None
 
     def forward(self, inp):
-
         if self.vq_layer is not None:
             vq_feats = self.vq_layer._embed(inp)
         else:

@@ -88,7 +88,7 @@ class Chat:
             gpt = GPTWrapper(**cfg).to(device).eval()
             assert gpt_ckpt_path, 'gpt_ckpt_path should not be None'
             gpt.load_state_dict(torch.load(gpt_ckpt_path, map_location='cpu'))
-            if compile:
+            if compile and 'cuda' in str(device):
                 gpt.gpt.forward = torch.compile(gpt.gpt.forward, backend='inductor', dynamic=True)
             self.pretrain_models['gpt'] = gpt
             spk_stat_path = os.path.join(os.path.dirname(gpt_ckpt_path), 'spk_stat.pt')
@@ -132,14 +132,12 @@ class Chat:
             for i, t in enumerate(text):
                 _lang = detect_language(t) if lang is None else lang
                 self.init_normalizer(_lang)
-                text[i] = self.normalizer[_lang].normalize(t, verbose=False, punct_post_process=True)
                 text[i] = self.normalizer[_lang](t)
-
                 if _lang == 'zh':
                     text[i] = apply_half2full_map(text[i])
 
         for i, t in enumerate(text):
-            invalid_characters = count_invalid_characters(i)
+            invalid_characters = count_invalid_characters(t)
             if len(invalid_characters):
                 self.logger.log(logging.WARNING, f'Invalid characters found! : {invalid_characters}')
                 text[i] = apply_character_map(t)
@@ -156,9 +154,10 @@ class Chat:
         result = inference_code(self.pretrain_models, text, **params_infer_code, return_hidden=use_decoder)
 
         if use_decoder:
-            mel_spec = [self.pretrain_models['decoder'](i[None].permute(0, 2, 1)) for i in result['hiddens']]
+            mel_spec = [self.pretrain_models['decoder'](i[None].permute(0,2,1)) for i in result['hiddens']]
         else:
-            mel_spec = [self.pretrain_models['dvae'](i[None].permute(0, 2, 1)) for i in result['ids']]
+            mel_spec = [self.pretrain_models['dvae'](i[None].permute(0,2,1)) for i in result['ids']]
+
         wav = [self.pretrain_models['vocos'].decode(i).cpu().numpy() for i in mel_spec]
 
         return wav
@@ -170,21 +169,17 @@ class Chat:
 
     def init_normalizer(self, lang):
         if lang not in self.normalizer:
-            from nemo_text_processing.text_normalization.normalize import Normalizer
-            self.normalizer[lang] = Normalizer(input_case='cased', lang=lang)
-
             if lang == 'zh':
                 try:
                     from tn.chinese.normalizer import Normalizer
                 except:
-                    self.logger.log(logging.WARNING, f'Package WeTextProcessing not found! '
-                                                     f'Run: conda install -c conda-forge pynini=2.1.5 && pip install WeTextProcessing')
+                    self.logger.log(logging.WARNING, f'Package WeTextProcessing not found! \
+                        Run: conda install -c conda-forge pynini=2.1.5 && pip install WeTextProcessing')
                 self.normalizer[lang] = Normalizer().normalize
             else:
                 try:
                     from nemo_text_processing.text_normalization.normalize import Normalizer
                 except:
-                    self.logger.log(logging.WARNING, f'Package nemo_text_processing not found! '
-                                                     f'Run: conda install -c conda-forge pynini=2.1.5 && pip install nemo_text_processing')
-            self.normalizer[lang] = partial(Normalizer(input_case='cased', lang=lang).normalize, verbose=False,
-                                            punct_post_process=True)
+                    self.logger.log(logging.WARNING, f'Package nemo_text_processing not found! \
+                        Run: conda install -c conda-forge pynini=2.1.5 && pip install nemo_text_processing')
+                self.normalizer[lang] = partial(Normalizer(input_case='cased', lang=lang).normalize, verbose=False, punct_post_process=True)

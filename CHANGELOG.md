@@ -45,3 +45,4 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Removed
 
 - `nemo_text_processing` dependency, as no longer needed for text normalization.
+- `__init__.py` file from the directories in the `src` directory.

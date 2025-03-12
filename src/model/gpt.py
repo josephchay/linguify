@@ -1,7 +1,5 @@
 import os
-
 os.environ["TOKENIZERS_PARALLELISM"] = "false"
-
 import logging
 from tqdm import tqdm
 from einops import rearrange
