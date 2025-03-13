@@ -47,6 +47,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Enhanced caching logic in the `prepare_inputs_for_generation` method to efficiently manage sequence lengths.
 - Initialized `past_key_alues` as `None` to optimize caching and improve token generation efficiency.
 - Updated installation and development instructions in the `README.md` documentation file.
+- Improved tensor operation for `DVAE` class via better feature reshaping and decoding.
 
 ### Removed
 
