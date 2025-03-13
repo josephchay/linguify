@@ -48,3 +48,7 @@ git clone https://github.com/josephchay/linguify.git
 cd linguify
 pip install -e .
 ```
+
+## Features & Updates
+
+Refer to the [CHANGELOG](CHANGELOG.md) file for the thorough latest updates and features of Linguify.

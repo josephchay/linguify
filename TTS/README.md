@@ -2,7 +2,7 @@
 
 LinguifySpeech is a Text-to-Speech (TTS) system that can convert written text to natural-sounding speech. 
 
-Our agent model is also uploaded to the [Hugging Face model hub](https://huggingface.co/josephchay/linguifySpeech).
+For our agent model assets and config files, refer to [Hugging Face model hub](https://huggingface.co/josephchay/linguifySpeech).
 
 ## Package Installation
 
@@ -160,6 +160,6 @@ https://github.com/user-attachments/assets/2cbeb712-a20a-47ee-957b-7b142652fa7d
 The audio outputs above not only demonstrate natural-sounding speech but also showcase the system's ability to 
 handle complex medical terminology with ease, as well as pronouncing them in a very rich tone, with strong pause-like smoothing slurs.
 
-## Updates
+## Features & Updates
 
-Refer to the [CHANGELOG](CHANGELOG.md) file for the thorough latest updates and features.
+Refer to the [CHANGELOG](CHANGELOG.md) file for the thorough latest updates and features of **LinguifySpeech TTS**.

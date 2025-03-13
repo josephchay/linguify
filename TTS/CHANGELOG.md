@@ -31,6 +31,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Text Normalization for both Chinese and English text.
 - `extended_inference.ipynb` notebook for more detailed inference demonstration.
 - Removed `[uv_break]` from the `inference_code` method.
+- `webui.py` for the web-based user interface.
 
 ### Fixed
 
