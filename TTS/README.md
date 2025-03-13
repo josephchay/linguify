@@ -16,7 +16,7 @@ pip install git+https://github.com/josephchay/linguify.git
 pip install "git+https://github.com/josephchay/linguify.git#egg=linguify[tts]"
 ```
 
-## Development
+## Setup & Development
 
 ### Clone the Repository
 

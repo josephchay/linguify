@@ -39,13 +39,18 @@ pip install git+https://github.com/josephchay/linguify.git
 If you only need the Text-to-Speech or Large Language Model functionality, you can install it separately instead as guided in [TTS](TTS/README.md)
 or [LLM](LLM/README.md) respectively.
 
-## Development
+## Setup & Development
 
-For development and contribution, clone the repository and install the package in editable mode:
+For development and contribution, clone the repository:
 
 ```bash
 git clone https://github.com/josephchay/linguify.git
 cd linguify
+```
+
+Install the package in editable mode:
+
+```bash
 pip install -e .
 ```
 

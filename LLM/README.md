@@ -2,7 +2,7 @@
 
 LinguifyChat is a Large Language Model (LLM) system that can generate human-like responses to text prompts. 
 
-## Development
+## Setup & Development
 
 ### Clone the Repository
 
