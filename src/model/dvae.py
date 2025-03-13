@@ -11,8 +11,7 @@ class ConvNeXtBlock(nn.Module):
     def __init__(self, dim: int, intermediate_dim: int, kernel, dilation, layer_scale_init_value: float = 1e-6):
         # ConvNeXt Block copied from Vocos.
         super().__init__()
-        self.dwconv = nn.Conv1d(dim, dim,
-                                kernel_size=kernel, padding=dilation * (kernel // 2),
+        self.dwconv = nn.Conv1d(dim, dim, kernel_size=kernel, padding=dilation * (kernel // 2),
                                 dilation=dilation, groups=dim)  # depthwise conv
 
         self.norm = nn.LayerNorm(dim, eps=1e-6)
@@ -65,7 +64,7 @@ class GFSQ(nn.Module):
         feat = self.quantizer.get_output_from_indices(x)
         return feat.transpose(1, 2) if self.transpose else feat
 
-    def forward(self, x, ):
+    def forward(self, x):
         if self.transpose:
             x = x.transpose(1, 2)
         feat, ind = self.quantizer(x)
@@ -87,10 +86,7 @@ class GFSQ(nn.Module):
 
 
 class DVAEDecoder(nn.Module):
-    def __init__(self, idim, odim,
-                 n_layer=12, bn_dim=64, hidden=256,
-                 kernel=7, dilation=2, up=False
-                 ):
+    def __init__(self, idim, odim, n_layer=12, bn_dim=64, hidden=256, kernel=7, dilation=2, up=False):
         super().__init__()
         self.up = up
         self.conv_in = nn.Sequential(

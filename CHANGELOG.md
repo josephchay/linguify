@@ -30,6 +30,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - `IPython` dependency in `requirements.txt`.
 - Text Normalization for both Chinese and English text.
 - `extended_inference.ipynb` notebook for more detailed inference demonstration.
+- Removed `[uv_break]` from the `inference_code` method.
 
 ### Fixed
 
@@ -41,6 +42,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - Ensure that `pad_token` and `pad_token_id` properly set when the tokenizer is loaded.
 - Upgraded `huggingface_hub` dependency from 0.26.3 to 0.28.1.
+- Enhanced caching logic in the `prepare_inputs_for_generation` method to efficiently manage sequence lengths.
+- Initialized `past_key_alues` as `None` to optimize caching and improve token generation efficiency.
 
 ### Removed
 

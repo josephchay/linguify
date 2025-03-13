@@ -63,9 +63,9 @@ class GPTWrapper(nn.Module):
 
         return emb
 
-    def prepare_inputs_for_generation(self, input_ids, past_key_values=None, attention_mask=None, inputs_embeds=None,
-                                      cache_position=None, **kwargs):
+    def prepare_inputs_for_generation(self, input_ids, past_key_values=None, attention_mask=None, inputs_embeds=None, cache_position=None, **kwargs):
         # With static cache, the `past_key_values` is None
+        # TODO: standardize interface for the different Cache classes and remove of this if
         has_static_cache = False
         if past_key_values is None:
             past_key_values = getattr(self.gpt.layers[0].self_attn, "past_key_value", None)
@@ -73,32 +73,17 @@ class GPTWrapper(nn.Module):
 
         past_length = 0
         if past_key_values is not None:
-            # Handle different cache types safely
-            if hasattr(past_key_values, "get_seq_length"):
-                # Cache has get_seq_length method
+            if isinstance(past_key_values, Cache):
                 past_length = cache_position[0] if cache_position is not None else past_key_values.get_seq_length()
-                max_cache_length = None
-                if hasattr(past_key_values, "get_max_length"):
-                    max_cache_length = torch.tensor(past_key_values.get_max_length(), device=input_ids.device) \
-                        if past_key_values.get_max_length() is not None else None
+                max_cache_length = (
+                    torch.tensor(past_key_values.get_max_length(), device=input_ids.device)
+                    if past_key_values.get_max_length() is not None
+                    else None
+                )
                 cache_length = past_length if max_cache_length is None else torch.min(max_cache_length, past_length)
+            # TODO: remove this `else` after `generate` prioritizes `Cache` objects
             else:
-                # For other cache types, infer length from shape
-                try:
-                    # Try to get length from the first layer's cache shape
-                    if isinstance(past_key_values, tuple):
-                        cache_length = past_length = past_key_values[0][0].shape[2]
-                    else:
-                        # For dict-based caches or other structures
-                        # Extract the first key value pair and get its shape
-                        for key, value in past_key_values.items() if hasattr(past_key_values,
-                                                                             'items') else past_key_values:
-                            if isinstance(value, tuple) and len(value) > 0:
-                                cache_length = past_length = value[0].shape[2]
-                                break
-                except (IndexError, AttributeError, TypeError):
-                    # If we can't determine the length, assume it's 0
-                    cache_length = past_length = 0
+                cache_length = past_length = past_key_values[0][0].shape[2]
                 max_cache_length = None
 
             # Keep only the unprocessed tokens:
@@ -114,8 +99,7 @@ class GPTWrapper(nn.Module):
             # 3 - Otherwise (past_length >= input_ids.shape[1]), let's assume input_ids only has unprocessed tokens.
 
             # If we are about to go beyond the maximum cache length, we need to crop the input attention mask.
-            if max_cache_length is not None and attention_mask is not None and cache_length + input_ids.shape[
-                1] > max_cache_length:
+            if max_cache_length is not None and attention_mask is not None and cache_length + input_ids.shape[1] > max_cache_length:
                 attention_mask = attention_mask[:, -max_cache_length:]
 
         position_ids = kwargs.get("position_ids", None)
@@ -130,7 +114,9 @@ class GPTWrapper(nn.Module):
         if inputs_embeds is not None and past_key_values is None:
             model_inputs = {"inputs_embeds": inputs_embeds}
         else:
-            # The `contiguous()` here is necessary to have a static stride during decoding.
+            # The `contiguous()` here is necessary to have a static stride during decoding. torchdynamo otherwise
+            # recompiles graphs as the stride of the inputs is a guard. Ref: https://github.com/huggingface/transformers/pull/29114
+            # TODO: use `next_tokens` directly instead.
             model_inputs = {"input_ids": input_ids.contiguous()}
 
         input_length = position_ids.shape[-1] if position_ids is not None else input_ids.shape[-1]
@@ -153,9 +139,7 @@ class GPTWrapper(nn.Module):
         )
         return model_inputs
 
-    def generate(self, emb, inputs_ids, temperature, eos_token, attention_mask=None, max_new_token=2048,
-                 min_new_token=0, LogitsWarpers=[], LogitsProcessors=[], infer_text=False, return_attn=False,
-                 return_hidden=False):
+    def generate(self, emb, inputs_ids, temperature, eos_token, attention_mask=None, max_new_token=2048, min_new_token=0, LogitsWarpers=[], LogitsProcessors=[], infer_text=False, return_attn=False, return_hidden=False):
         with torch.no_grad():
             attentions = []
             hiddens = []
@@ -172,11 +156,15 @@ class GPTWrapper(nn.Module):
             if attention_mask is not None:
                 attention_mask_cache[:, :attention_mask.shape[1]] = attention_mask
 
+            past_key_values = None
+
             for i in tqdm(range(max_new_token)):
-                model_input = self.prepare_inputs_for_generation(inputs_ids,
-                                                                 outputs.past_key_values if i != 0 else None,
-                                                                 attention_mask_cache[:, :inputs_ids.shape[1]],
-                                                                 use_cache=True)
+                model_input = self.prepare_inputs_for_generation(
+                    inputs_ids,
+                    past_key_values,
+                    attention_mask_cache[:, :inputs_ids.shape[1]],
+                    use_cache=True,
+                )
 
                 if i == 0:
                     model_input['inputs_embeds'] = emb
@@ -189,8 +177,11 @@ class GPTWrapper(nn.Module):
 
                 model_input['input_ids'] = None
                 outputs = self.gpt.forward(**model_input, output_attentions=return_attn)
+                del model_input
                 attentions.append(outputs.attentions)
                 hidden_states = outputs[0]
+                past_key_values = outputs.past_key_values
+                del outputs
                 if return_hidden:
                     hiddens.append(hidden_states[:, -1])
 
@@ -215,24 +206,30 @@ class GPTWrapper(nn.Module):
 
                 for logitsWarpers in LogitsWarpers:
                     logits = logitsWarpers(logits_token, logits)
+                del logits_token
 
                 if i < min_new_token:
                     logits[:, eos_token] = -torch.inf
 
                 scores = F.softmax(logits, dim=-1)
+                del logits
 
                 idx_next = torch.multinomial(scores, num_samples=1)
 
                 if not infer_text:
                     idx_next = rearrange(idx_next, "(b n) 1 -> b n", n=self.num_vq)
-                    finish = finish | (idx_next == eos_token).any(1)
+                    finish_or = (idx_next == eos_token).any(1)
+                    finish |= finish_or
+                    del finish_or
                     inputs_ids = torch.cat([inputs_ids, idx_next.unsqueeze(1)], 1)
                 else:
-                    finish = finish | (idx_next == eos_token).any(1)
+                    finish_or = (idx_next == eos_token).any(1)
+                    finish |= finish_or
+                    del finish_or
                     inputs_ids = torch.cat([inputs_ids, idx_next.unsqueeze(-1).expand(-1, -1, self.num_vq)], 1)
 
-                end_idx = end_idx + (~finish).int()
-
+                del idx_next
+                end_idx += (~finish).int().to(end_idx.device)
                 if finish.all():
                     break
 
@@ -245,6 +242,8 @@ class GPTWrapper(nn.Module):
 
             if not finish.all():
                 self.logger.warn(f'Incomplete result. hit max_new_token: {max_new_token}')
+
+            del finish
 
             return {
                 'ids': inputs_ids,
