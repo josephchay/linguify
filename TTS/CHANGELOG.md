@@ -44,8 +44,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Upgraded `huggingface_hub` dependency from 0.26.3 to 0.28.1.
 - Enhanced caching logic in the `prepare_inputs_for_generation` method to efficiently manage sequence lengths.
 - Initialized `past_key_alues` as `None` to optimize caching and improve token generation efficiency.
+- Updated installation and development instructions in the `README.md` documentation file.
 
 ### Removed
 
 - `nemo_text_processing` dependency, as no longer needed for text normalization.
 - `__init__.py` file from the directories in the `src` directory.
+- `setup.py` file since TTS is now moved to its dedicated folder.

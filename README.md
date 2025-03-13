@@ -12,9 +12,11 @@ and redefine customer interactions with intelligence, care, and precision.
 
 _Linguify – Because Conversations Should Resonate._
 
+![Linguify](assets/thumbnail.png)
+
 ---
 
-## Model Agents
+## Model Agents & Architecture Systems
 
 ### Text to Speech (TTS)
 
@@ -25,3 +27,24 @@ human-like speech with exceptional clarity and expression.
 
 Linguify's [Large Language Model (LLM)](LLM/README.md) is an advanced  conversational AI engineered to deliver highly intelligent, 
 human-like responses with remarkable precision and depth.
+
+## Package Installation
+
+To use this as a package, install the latest version directly from the repository:
+
+```bash
+pip install git+https://github.com/josephchay/linguify.git
+```
+
+If you only need the Text-to-Speech or Large Language Model functionality, you can install it separately instead as guided in [TTS](TTS/README.md)
+or [LLM](LLM/README.md) respectively.
+
+## Development
+
+For development and contribution, clone the repository and install the package in editable mode:
+
+```bash
+git clone https://github.com/josephchay/linguify.git
+cd linguify
+pip install -e .
+```

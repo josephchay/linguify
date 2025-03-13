@@ -1,21 +1,42 @@
-# LinguifySpeech TTS System
+# LinguifySpeech TTS Agent Architecture System
 
 LinguifySpeech is a Text-to-Speech (TTS) system that can convert written text to natural-sounding speech. 
 
 Our agent model is also uploaded to the [Hugging Face model hub](https://huggingface.co/josephchay/linguifySpeech).
 
-## Project Setup
+## Package Installation
+
+```bash
+# Install directly from GitHub
+pip install git+https://github.com/josephchay/linguify.git
+```
+
+```bash
+# Or for TTS component only
+pip install "git+https://github.com/josephchay/linguify.git#egg=linguify[tts]"
+```
+
+## Development
+
+### Clone the Repository
 
 To install the LinguifySpeech TTS system, you can use the following commands:
 
 ```bash
 git clone https://github.com/josephchay/linguify.git
-cd linguify/TTS
 ```
 
 ### Install Dependencies
 
 ```bash
+cd linguify
+pip install -e .
+```
+
+or for manual installation without `setup.py`:
+
+```bash
+cd linguify/TTS
 pip install -r requirements.txt
 ```
 
