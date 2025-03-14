@@ -38,6 +38,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - `HomophonesReplacer` class for chinese / mandarin characters.
 - `init_homophones_replacer` method to initialize the homophones replacer in `core.py`.
 - New `thumbnail2.png` image for the `README.md` file.
+- Support of `torch.compile` for Windows. 
 
 ### Fixed
 

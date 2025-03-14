@@ -106,6 +106,10 @@ class Chat:
             audio_generator.load_state_dict(torch.load(gpt_ckpt_path))
             if compile and 'cuda' in str(device):
                 audio_generator.model.forward = torch.compile(audio_generator.model.forward, backend='inductor', dynamic=True)
+                try:
+                    audio_generator.model.forward = torch.compile(audio_generator.model.forward, backend='inductor', dynamic=True)
+                except RuntimeError as e:
+                    logging.warning(f'Compile failed, {e}. fallback to normal mode.')
             self.pretrain_models['gpt'] = audio_generator
             spk_stat_path = os.path.join(os.path.dirname(gpt_ckpt_path), 'spk_stat.pt')
             assert os.path.exists(spk_stat_path), f'Missing spk_stat.pt: {spk_stat_path}'
