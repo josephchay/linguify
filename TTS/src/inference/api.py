@@ -5,7 +5,7 @@ from transformers.generation import TopKLogitsWarper, TopPLogitsWarper
 from ..utils.inference_utils import CustomRepetitionPenaltyLogitsProcessorRepeat
 
 
-def inference_code(models, text, spk_emb=None, top_P=0.7, top_K=20, temperature=0.3, repetition_penalty=1.05, max_new_token=2048, **kwargs):
+def inference_code(models, text, spk_emb=None, top_P=0.7, top_K=20, temperature=0.3, repetition_penalty=1.05, max_new_token=2048, stream=False, **kwargs):
     device = next(models['gpt'].parameters()).device
 
     if not isinstance(text, list):
@@ -55,6 +55,7 @@ def inference_code(models, text, spk_emb=None, top_P=0.7, top_K=20, temperature=
         eos_token=num_code,
         max_new_token=max_new_token,
         infer_text=False,
+        stream=stream,
         **kwargs
     )
 
@@ -98,7 +99,7 @@ def refine_text(models, text, top_P=0.7, top_K=20, temperature=0.7, repetition_p
         eos_token=torch.tensor(models['tokenizer'].convert_tokens_to_ids('[Ebreak]'), device=device)[None],
         max_new_token=max_new_token,
         infer_text=True,
+        stream=False,
         **kwargs
     )
-
-    return result
+    return next(result)

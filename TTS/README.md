@@ -111,7 +111,16 @@ params_refine_text = {
 wav = chat.inference(texts, params_refine_text=params_refine_text, params_infer_code=params_infer_code)
 
 # For word level manual control.
-text = 'What is [uv_break]your favorite english food?[laugh][lbreak]'
+text = """Managing acute [uv_break]hypertensive crisis[uv_break] requires swift evaluation and intervention. 
+In cases of [uv_break]hypertensive emergency[uv_break] with end-organ damage, agents like [uv_break]labetalol[uv_break], 
+[uv_break]nicardipine[uv_break], or [uv_break]sodium nitroprusside[uv_break] are commonly administered intravenously. 
+[laugh]Not exactly your everyday headache cure![laugh] [uv_break]Careful titration[uv_break] is crucial to avoid 
+precipitous drops in blood pressure, which may lead to [uv_break]cerebral hypoperfusion[uv_break] or [uv_break]myocardial 
+ischemia.[uv_break] [laugh]That's one way to swap one crisis for another![laugh] [uv_break]For patients 
+with [uv_break]pheochromocytoma[uv_break], initiating alpha-blockade with agents like [uv_break]phenoxybenzamine[uv_break] 
+before beta-blockers is essential to prevent [uv_break]hypertensive rebound.[uv_break] [laugh]Getting those steps reversed? 
+Bad idea.[laugh] [uv_break]Ultimately,[uv_break] close hemodynamic monitoring and clinical judgment are key to 
+ensuring patient stability and recovery."""
 wav = chat.inference(text, skip_refine_text=True, params_refine_text=params_refine_text,  params_infer_code=params_infer_code)
 torchaudio.save("audio_output2.wav", torch.from_numpy(wavs[0]), 24000)
 ```
@@ -163,3 +172,14 @@ handle complex medical terminology with ease, as well as pronouncing them in a v
 ## Features & Updates
 
 Refer to the [CHANGELOG](CHANGELOG.md) file for the thorough latest updates and features of **LinguifySpeech TTS**.
+
+---
+
+## Previous Implementations (Temporary)
+
+### Modelling
+
+Although previous applications can be seen to have files like `gpt.py` and classes like `GPTWrapper`,
+These are merely just names (proven by the absence of any OpenAI API or external API usage). 
+It was previously named after as we were using a temporary LLaMA model architecture for our language processing components. 
+The actual implementation is fully self-contained and uses our own training and custom code for inference and generation.

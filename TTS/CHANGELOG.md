@@ -33,6 +33,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Removed `[uv_break]` from the `inference_code` method.
 - `webui.py` for the web-based user interface.
 - New `cmd.py` file for command-line interface.
+- `stream` parameter to `inference_code` generation pipeline.
+- Apple GPU checking for device selection. 
+- `HomophonesReplacer` class for chinese / mandarin characters.
+- `init_homophones_replacer` method to initialize the homophones replacer in `core.py`.
+- New `thumbnail2.png` image for the `README.md` file.
 
 ### Fixed
 
@@ -48,9 +53,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Initialized `past_key_alues` as `None` to optimize caching and improve token generation efficiency.
 - Updated installation and development instructions in the `README.md` documentation file.
 - Improved tensor operation for `DVAE` class via better feature reshaping and decoding.
+- Dependencies versions in the `requirements.txt` file.
 
 ### Removed
 
 - `nemo_text_processing` dependency, as no longer needed for text normalization.
 - `__init__.py` file from the directories in the `src` directory.
 - `setup.py` file since TTS is now moved to its dedicated folder.
+- `**kwargs` argument from the `AudioGenerator` class.

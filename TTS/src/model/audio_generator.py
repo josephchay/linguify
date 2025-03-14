@@ -28,13 +28,13 @@ class LlamaMLP(nn.Module):
         return down_proj
 
 
-class GPTWrapper(nn.Module):
-    def __init__(self, gpt_config, num_audio_tokens, num_text_tokens, num_vq=4, **kwargs):
+class AudioGenerator(nn.Module):
+    def __init__(self, config, num_audio_tokens, num_text_tokens, num_vq=4):
         super().__init__()
 
         self.logger = logging.getLogger(__name__)
-        self.gpt = self.build_model(gpt_config)
-        self.model_dim = self.gpt.config.hidden_size
+        self.model = self.build_model(config)
+        self.model_dim = self.model.config.hidden_size
 
         self.num_vq = num_vq
         self.emb_code = nn.ModuleList([nn.Embedding(num_audio_tokens, self.model_dim) for i in range(self.num_vq)])
@@ -68,7 +68,7 @@ class GPTWrapper(nn.Module):
         # TODO: standardize interface for the different Cache classes and remove of this if
         has_static_cache = False
         if past_key_values is None:
-            past_key_values = getattr(self.gpt.layers[0].self_attn, "past_key_value", None)
+            past_key_values = getattr(self.model.layers[0].self_attn, "past_key_value", None)
             has_static_cache = past_key_values is not None
 
         past_length = 0
@@ -139,7 +139,9 @@ class GPTWrapper(nn.Module):
         )
         return model_inputs
 
-    def generate(self, emb, inputs_ids, temperature, eos_token, attention_mask=None, max_new_token=2048, min_new_token=0, LogitsWarpers=[], LogitsProcessors=[], infer_text=False, return_attn=False, return_hidden=False):
+    def generate(self, emb, inputs_ids, temperature, eos_token, attention_mask=None, max_new_token=2048, min_new_token=0,
+                 LogitsWarpers=[], LogitsProcessors=[], infer_text=False, return_attn=False,
+                 return_hidden=False, stream=False):
         with torch.no_grad():
             attentions = []
             hiddens = []
@@ -156,82 +158,103 @@ class GPTWrapper(nn.Module):
             if attention_mask is not None:
                 attention_mask_cache[:, :attention_mask.shape[1]] = attention_mask
 
-            past_key_values = None
+            with tqdm(total=max_new_token) as pbar:
+                past_key_values = None
 
-            for i in tqdm(range(max_new_token)):
-                model_input = self.prepare_inputs_for_generation(
-                    inputs_ids,
-                    past_key_values,
-                    attention_mask_cache[:, :inputs_ids.shape[1]],
-                    use_cache=True,
-                )
+                for i in range(max_new_token):
+                    pbar.update(1)
+                    model_input = self.prepare_inputs_for_generation(
+                        inputs_ids,
+                        past_key_values,
+                        attention_mask_cache[:, :inputs_ids.shape[1]],
+                        use_cache=True,
+                    )
 
-                if i == 0:
-                    model_input['inputs_embeds'] = emb
-                else:
-                    if infer_text:
-                        model_input['inputs_embeds'] = self.emb_text(model_input['input_ids'][:, :, 0])
+                    if i == 0:
+                        model_input['inputs_embeds'] = emb
                     else:
-                        code_emb = [self.emb_code[i](model_input['input_ids'][:, :, i]) for i in range(self.num_vq)]
-                        model_input['inputs_embeds'] = torch.stack(code_emb, 3).sum(3)
+                        if infer_text:
+                            model_input['inputs_embeds'] = self.emb_text(model_input['input_ids'][:, :, 0])
+                        else:
+                            code_emb = [self.emb_code[i](model_input['input_ids'][:, :, i]) for i in range(self.num_vq)]
+                            model_input['inputs_embeds'] = torch.stack(code_emb, 3).sum(3)
 
-                model_input['input_ids'] = None
-                outputs = self.gpt.forward(**model_input, output_attentions=return_attn)
-                del model_input
-                attentions.append(outputs.attentions)
-                hidden_states = outputs[0]
-                past_key_values = outputs.past_key_values
-                del outputs
-                if return_hidden:
-                    hiddens.append(hidden_states[:, -1])
+                    model_input['input_ids'] = None
+                    outputs = self.model.forward(**model_input, output_attentions=return_attn)
+                    del model_input
+                    attentions.append(outputs.attentions)
+                    hidden_states = outputs[0]
+                    past_key_values = outputs.past_key_values
+                    del outputs
+                    if return_hidden:
+                        hiddens.append(hidden_states[:, -1])
 
-                with P.cached():
-                    if infer_text:
-                        logits = self.head_text(hidden_states)
+                    with P.cached():
+                        if infer_text:
+                            logits = self.head_text(hidden_states)
+                        else:
+                            logits = torch.stack([self.head_code[i](hidden_states) for i in range(self.num_vq)], 3)
+
+                    logits = logits[:, -1].float()
+
+                    if not infer_text:
+                        logits = rearrange(logits, "b c n -> (b n) c")
+                        logits_token = rearrange(inputs_ids[:, start_idx:], "b c n -> (b n) c")
                     else:
-                        logits = torch.stack([self.head_code[i](hidden_states) for i in range(self.num_vq)], 3)
+                        logits_token = inputs_ids[:, start_idx:, 0]
 
-                logits = logits[:, -1].float()
+                    logits = logits / temperature
 
-                if not infer_text:
-                    logits = rearrange(logits, "b c n -> (b n) c")
-                    logits_token = rearrange(inputs_ids[:, start_idx:], "b c n -> (b n) c")
-                else:
-                    logits_token = inputs_ids[:, start_idx:, 0]
+                    for logitsProcessors in LogitsProcessors:
+                        logits = logitsProcessors(logits_token, logits)
 
-                logits = logits / temperature
+                    for logitsWarpers in LogitsWarpers:
+                        logits = logitsWarpers(logits_token, logits)
 
-                for logitsProcessors in LogitsProcessors:
-                    logits = logitsProcessors(logits_token, logits)
+                    del logits_token
 
-                for logitsWarpers in LogitsWarpers:
-                    logits = logitsWarpers(logits_token, logits)
-                del logits_token
+                    if i < min_new_token:
+                        logits[:, eos_token] = -torch.inf
 
-                if i < min_new_token:
-                    logits[:, eos_token] = -torch.inf
+                    scores = F.softmax(logits, dim=-1)
 
-                scores = F.softmax(logits, dim=-1)
-                del logits
+                    del logits
 
-                idx_next = torch.multinomial(scores, num_samples=1)
+                    idx_next = torch.multinomial(scores, num_samples=1)
 
-                if not infer_text:
-                    idx_next = rearrange(idx_next, "(b n) 1 -> b n", n=self.num_vq)
-                    finish_or = (idx_next == eos_token).any(1)
-                    finish |= finish_or
-                    del finish_or
-                    inputs_ids = torch.cat([inputs_ids, idx_next.unsqueeze(1)], 1)
-                else:
-                    finish_or = (idx_next == eos_token).any(1)
-                    finish |= finish_or
-                    del finish_or
-                    inputs_ids = torch.cat([inputs_ids, idx_next.unsqueeze(-1).expand(-1, -1, self.num_vq)], 1)
+                    if not infer_text:
+                        idx_next = rearrange(idx_next, "(b n) 1 -> b n", n=self.num_vq)
+                        finish_or = (idx_next == eos_token).any(1)
+                        finish |= finish_or
+                        del finish_or
+                        inputs_ids = torch.cat([inputs_ids, idx_next.unsqueeze(1)], 1)
+                    else:
+                        finish_or = (idx_next == eos_token).any(1)
+                        finish |= finish_or
+                        del finish_or
+                        inputs_ids = torch.cat([inputs_ids, idx_next.unsqueeze(-1).expand(-1, -1, self.num_vq)], 1)
 
-                del idx_next
-                end_idx += (~finish).int().to(end_idx.device)
-                if finish.all():
-                    break
+                    del idx_next
+
+                    end_idx += (~finish).int().to(end_idx.device)
+                    if stream:
+                        if end_idx % 24 and not finish.all():
+                            continue
+                        y_inputs_ids = [inputs_ids[idx, start_idx: start_idx + i] for idx, i in
+                                        enumerate(end_idx.int())]
+                        y_inputs_ids = [i[:, 0] for i in y_inputs_ids] if infer_text else y_inputs_ids
+                        y_hiddens = [[]]
+                        if return_hidden:
+                            y_hiddens = torch.stack(hiddens, 1)
+                            y_hiddens = [y_hiddens[idx, :i] for idx, i in enumerate(end_idx.int())]
+                        yield {
+                            'ids': y_inputs_ids,
+                            'attentions': attentions,
+                            'hiddens': y_hiddens,
+                        }
+                    if finish.all():
+                        pbar.update(max_new_token - i - 1)
+                        break
 
             inputs_ids = [inputs_ids[idx, start_idx: start_idx + i] for idx, i in enumerate(end_idx.int())]
             inputs_ids = [i[:, 0] for i in inputs_ids] if infer_text else inputs_ids
@@ -245,7 +268,7 @@ class GPTWrapper(nn.Module):
 
             del finish
 
-            return {
+            yield {
                 'ids': inputs_ids,
                 'attentions': attentions,
                 'hiddens': hiddens,

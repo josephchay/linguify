@@ -58,9 +58,7 @@ class GFSQ(nn.Module):
     def _embed(self, x):
         if self.transpose:
             x = x.transpose(1, 2)
-        x = rearrange(
-            x, "b t (g r) -> g b t r", g=self.G, r=self.R,
-        )
+        x = rearrange(x, "b t (g r) -> g b t r", g=self.G, r=self.R)
         feat = self.quantizer.get_output_from_indices(x)
         return feat.transpose(1, 2) if self.transpose else feat
 
@@ -68,9 +66,7 @@ class GFSQ(nn.Module):
         if self.transpose:
             x = x.transpose(1, 2)
         feat, ind = self.quantizer(x)
-        ind = rearrange(
-            ind, "g b t r ->b t (g r)",
-        )
+        ind = rearrange(ind, "g b t r ->b t (g r)")
         embed_onehot = F.one_hot(ind.long(), self.n_ind).to(x.dtype)
         e_mean = torch.mean(embed_onehot, dim=[0, 1])
         e_mean = e_mean / (e_mean.sum(dim=1) + self.eps).unsqueeze(1)
@@ -93,9 +89,7 @@ class DVAEDecoder(nn.Module):
             nn.Conv1d(idim, bn_dim, 3, 1, 1), nn.GELU(),
             nn.Conv1d(bn_dim, hidden, 3, 1, 1)
         )
-        self.decoder_block = nn.ModuleList([
-            ConvNeXtBlock(hidden, hidden * 4, kernel, dilation, )
-            for _ in range(n_layer)])
+        self.decoder_block = nn.ModuleList([ConvNeXtBlock(hidden, hidden * 4, kernel, dilation) for _ in range(n_layer)])
         self.conv_out = nn.Conv1d(hidden, odim, kernel_size=1, bias=False)
 
     def forward(self, input, conditioning=None):
@@ -127,7 +121,7 @@ class DVAE(nn.Module):
         else:
             vq_feats = inp.detach().clone()
 
-        vq_feats = vq_feats.view((vq_feats.size(0), 2, vq_feats.size(1)//2, vq_feats.size(2))).permute(0, 2, 3, 1).flatten(2)
+        vq_feats = vq_feats.view((vq_feats.size(0), 2, vq_feats.size(1) // 2, vq_feats.size(2))).permute(0, 2, 3, 1).flatten(2)
 
         vq_feats = vq_feats.transpose(1, 2)
         dec_out = self.decoder(input=vq_feats)

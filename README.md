@@ -1,5 +1,7 @@
 # Linguify – The Future of Conversational AI
 
+**Pushing the boundaries of AI-driven automated conversations for call centers.**
+
 Unlock the power of seamless communication with Linguify, the next-generation call center AI that speaks just like a human - fascinatingly even more. 
 Designed with advanced sentiment analysis and deep understanding of human psychology, 
 Linguify goes beyond basic chatbot responses. It listens, understands emotions, and responds naturally, 
@@ -10,9 +12,9 @@ Linguify adapts to every situation with unparalleled fluency.
 Empower your business with the most human-like conversational AI, 
 and redefine customer interactions with intelligence, care, and precision.
 
-_Linguify – Because Conversations Should Resonate._
+![Linguify](assets/thumbnail2.png)
 
-![Linguify](assets/thumbnail.png)
+_Linguify – Because Conversations Should Resonate._
 
 ---
 
