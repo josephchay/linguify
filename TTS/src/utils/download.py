@@ -57,9 +57,7 @@ def check_all_assets(update=False) -> bool:
     ]
     for model in names:
         menv = model.replace(".", "_")
-        if not check_model(
-            current_dir, model, os.environ[f"sha256_asset_{menv}"], update
-        ):
+        if not check_model(current_dir, model, os.environ[f"sha256_asset_{menv}"], update):
             return False
 
     logger.info("checking configs...")
@@ -73,9 +71,7 @@ def check_all_assets(update=False) -> bool:
     ]
     for model in names:
         menv = model.replace(".", "_")
-        if not check_model(
-            current_dir, model, os.environ[f"sha256_config_{menv}"], update
-        ):
+        if not check_model(current_dir, model, os.environ[f"sha256_config_{menv}"], update):
             return False
 
     logger.info("all assets are already latest.")

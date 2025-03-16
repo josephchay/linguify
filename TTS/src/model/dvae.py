@@ -1,5 +1,4 @@
 import math
-from einops import rearrange
 from vector_quantize_pytorch import GroupedResidualFSQ
 
 import torch
@@ -8,11 +7,10 @@ import torch.nn.functional as F
 
 
 class ConvNeXtBlock(nn.Module):
-    def __init__(self, dim: int, intermediate_dim: int, kernel, dilation, layer_scale_init_value: float = 1e-6):
+    def __init__(self, dim: int, intermediate_dim: int, kernel, dilation, layer_scale_init_value: float = 1e-6,):
         # ConvNeXt Block copied from Vocos.
         super().__init__()
-        self.dwconv = nn.Conv1d(dim, dim, kernel_size=kernel, padding=dilation * (kernel // 2),
-                                dilation=dilation, groups=dim)  # depthwise conv
+        self.dwconv = nn.Conv1d(dim, dim, kernel_size=kernel, padding=dilation * (kernel // 2), dilation=dilation, groups=dim)  # depthwise conv
 
         self.norm = nn.LayerNorm(dim, eps=1e-6)
         self.pwconv1 = nn.Linear(dim, intermediate_dim)  # pointwise/1x1 convs, implemented with linear layers
@@ -55,19 +53,32 @@ class GFSQ(nn.Module):
         self.G = G
         self.R = R
 
-    def _embed(self, x):
+    def _embed(self, x: torch.Tensor):
         if self.transpose:
             x = x.transpose(1, 2)
-        x = rearrange(x, "b t (g r) -> g b t r", g=self.G, r=self.R)
+        """
+        x = rearrange(
+            x, "b t (g r) -> g b t r", g = self.G, r = self.R,
+        )
+        """
+        x.view(-1, self.G, self.R).permute(2, 0, 1, 3)
         feat = self.quantizer.get_output_from_indices(x)
         return feat.transpose(1, 2) if self.transpose else feat
 
-    def forward(self, x):
+    def forward(self, x, ):
         if self.transpose:
             x = x.transpose(1, 2)
         feat, ind = self.quantizer(x)
-        ind = rearrange(ind, "g b t r ->b t (g r)")
-        embed_onehot = F.one_hot(ind.long(), self.n_ind).to(x.dtype)
+        """
+        ind = rearrange(
+            ind, "g b t r ->b t (g r)",
+        )
+        """
+        ind = ind.permute(1, 2, 0, 3).contiguous()
+        ind = ind.view(ind.size(0), ind.size(1), -1)
+        embed_onehot_tmp = F.one_hot(ind.long(), self.n_ind)
+        embed_onehot = embed_onehot_tmp.to(x.dtype)
+        del embed_onehot_tmp
         e_mean = torch.mean(embed_onehot, dim=[0, 1])
         e_mean = e_mean / (e_mean.sum(dim=1) + self.eps).unsqueeze(1)
         perplexity = torch.exp(-torch.sum(e_mean * torch.log(e_mean + self.eps), dim=1))
@@ -89,7 +100,9 @@ class DVAEDecoder(nn.Module):
             nn.Conv1d(idim, bn_dim, 3, 1, 1), nn.GELU(),
             nn.Conv1d(bn_dim, hidden, 3, 1, 1)
         )
-        self.decoder_block = nn.ModuleList([ConvNeXtBlock(hidden, hidden * 4, kernel, dilation) for _ in range(n_layer)])
+        self.decoder_block = nn.ModuleList([
+            ConvNeXtBlock(hidden, hidden * 4, kernel, dilation, )
+            for _ in range(n_layer)])
         self.conv_out = nn.Conv1d(hidden, odim, kernel_size=1, bias=False)
 
     def forward(self, input, conditioning=None):
