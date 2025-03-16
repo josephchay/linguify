@@ -38,12 +38,8 @@ class LLMApi:
         dtype = torch.bfloat16 if self.device == "cuda" and torch.cuda.is_bf16_supported() else torch.float16
 
         # Load with appropriate parameters for memory efficiency
-        self.model = AutoModelForCausalLM.from_pretrained(
-            model_name,
-            torch_dtype=dtype,
-            device_map=self.device,
-            trust_remote_code=True  # Needed for some models
-        )
+        self.model = AutoModelForCausalLM.from_pretrained(model_name, torch_dtype=dtype, device_map=self.device,
+                                                          trust_remote_code=True)  # Needed for some models
 
     def _format_prompt(self, prompt_messages):
         full_prompt = ""
@@ -76,16 +72,7 @@ class LLMApi:
 
         # Generate response
         with torch.no_grad():
-            outputs = self.model.generate(
-                inputs["input_ids"],
-                attention_mask=inputs["attention_mask"],
-                max_new_tokens=max_length,
-                temperature=temperature,
-                do_sample=temperature > 0,
-                top_p=0.9,
-                pad_token_id=self.tokenizer.eos_token_id,
-                **kwargs
-            )
+            outputs = self.model.generate(inputs["input_ids"], attention_mask=inputs["attention_mask"], max_new_tokens=max_length, temperature=temperature, do_sample=temperature > 0, top_p=0.9, pad_token_id=self.tokenizer.eos_token_id, **kwargs)
 
         # Decode the generated tokens, skipping the input
         response = self.tokenizer.decode(outputs[0][inputs["input_ids"].shape[1]:], skip_special_tokens=True)

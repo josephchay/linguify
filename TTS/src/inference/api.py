@@ -46,18 +46,9 @@ def inference_code(models, text, spk_emb=None, top_P=0.7, top_K=20, temperature=
     if repetition_penalty is not None and repetition_penalty != 1:
         LogitsProcessors.append(CustomRepetitionPenaltyLogitsProcessorRepeat(repetition_penalty, num_code, 16))
 
-    result = models['gpt'].generate(
-        emb, inputs['input_ids'],
-        temperature=torch.tensor(temperature, device=device),
-        attention_mask=inputs['attention_mask'],
-        LogitsWarpers=LogitsWarpers,
-        LogitsProcessors=LogitsProcessors,
-        eos_token=num_code,
-        max_new_token=max_new_token,
-        infer_text=False,
-        stream=stream,
-        **kwargs
-    )
+    result = models['gpt'].generate(emb, inputs['input_ids'], temperature=torch.tensor(temperature, device=device), attention_mask=inputs['attention_mask'],
+                                    LogitsWarpers=LogitsWarpers, LogitsProcessors=LogitsProcessors, eos_token=num_code,
+                                    max_new_token=max_new_token, infer_text=False, stream=stream, **kwargs)
 
     return result
 
@@ -90,16 +81,10 @@ def refine_text(models, text, top_P=0.7, top_K=20, temperature=0.7, repetition_p
     if repetition_penalty is not None and repetition_penalty != 1:
         LogitsProcessors.append(CustomRepetitionPenaltyLogitsProcessorRepeat(repetition_penalty, len(models['tokenizer']), 16))
 
-    result = models['gpt'].generate(
-        models['gpt'].get_emb(**inputs), inputs['input_ids'],
-        temperature=torch.tensor([temperature, ], device=device),
-        attention_mask=inputs['attention_mask'],
-        LogitsWarpers=LogitsWarpers,
-        LogitsProcessors=LogitsProcessors,
-        eos_token=torch.tensor(models['tokenizer'].convert_tokens_to_ids('[Ebreak]'), device=device)[None],
-        max_new_token=max_new_token,
-        infer_text=True,
-        stream=False,
-        **kwargs
-    )
+    result = models['gpt'].generate(models['gpt'].get_emb(**inputs),
+                                    inputs['input_ids'], temperature=torch.tensor([temperature, ], device=device),
+                                    attention_mask=inputs['attention_mask'], LogitsWarpers=LogitsWarpers,
+                                    LogitsProcessors=LogitsProcessors, eos_token=torch.tensor(models['tokenizer'].convert_tokens_to_ids('[Ebreak]'), device=device)[None],
+                                    max_new_token=max_new_token, infer_text=True, stream=False, **kwargs)
+
     return next(result)

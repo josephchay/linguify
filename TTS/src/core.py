@@ -59,12 +59,12 @@ class Chat:
         elif source == 'huggingface':
             hf_home = os.getenv('HF_HOME', os.path.expanduser("~/.cache/huggingface"))
             try:
-                download_path = get_latest_modified_file(os.path.join(hf_home, 'hub/models--2Noise--ChatTTS/snapshots'))
+                download_path = get_latest_modified_file(os.path.join(hf_home, 'hub/models--josephchay--LinguifySpeech/snapshots'))
             except:
                 download_path = None
             if download_path is None or force_redownload:
-                self.logger.log(logging.INFO, f'Download from HF: https://huggingface.co/2Noise/ChatTTS')
-                download_path = snapshot_download(repo_id="2Noise/ChatTTS", allow_patterns=["*.pt", "*.yaml"])
+                self.logger.log(logging.INFO, f'Download from HF: https://huggingface.co/josephchay/LinguifySpeech')
+                download_path = snapshot_download(repo_id="josephchay/LinguifySpeech", allow_patterns=["*.pt", "*.yaml"])
             else:
                 self.logger.log(logging.INFO, f'Load from cache: {download_path}')
         elif source == 'custom':
@@ -74,7 +74,7 @@ class Chat:
         self._load(**{k: os.path.join(download_path, v) for k, v in OmegaConf.load(os.path.join(download_path, 'config', 'path.yaml')).items()}, **kwargs)
 
     def _load(self, vocos_config_path: str = None, vocos_ckpt_path: str = None, dvae_config_path: str = None,
-              dvae_ckpt_path: str = None, gpt_config_path: str = None, gpt_ckpt_path: str = None,
+              dvae_ckpt_path: str = None, model_config_path: str = None, model_ckpt_path: str = None,
               decoder_config_path: str = None, decoder_ckpt_path: str = None, tokenizer_path: str = None,
               device: str = None, compile: bool = True):
         if not device:
@@ -99,11 +99,11 @@ class Chat:
             self.pretrain_models['dvae'] = dvae
             self.logger.log(logging.INFO, 'dvae loaded.')
 
-        if gpt_config_path:
-            cfg = OmegaConf.load(gpt_config_path)
+        if model_config_path:
+            cfg = OmegaConf.load(model_config_path)
             audio_generator = AudioGenerator(**cfg).to(device).eval()
-            assert gpt_ckpt_path, 'gpt_ckpt_path should not be None'
-            audio_generator.load_state_dict(torch.load(gpt_ckpt_path))
+            assert model_ckpt_path, 'model_config_path should not be None'
+            audio_generator.load_state_dict(torch.load(model_ckpt_path))
             if compile and 'cuda' in str(device):
                 audio_generator.model.forward = torch.compile(audio_generator.model.forward, backend='inductor', dynamic=True)
                 try:
@@ -111,10 +111,10 @@ class Chat:
                 except RuntimeError as e:
                     logging.warning(f'Compile failed, {e}. fallback to normal mode.')
             self.pretrain_models['gpt'] = audio_generator
-            spk_stat_path = os.path.join(os.path.dirname(gpt_ckpt_path), 'spk_stat.pt')
+            spk_stat_path = os.path.join(os.path.dirname(model_ckpt_path), 'spk_stat.pt')
             assert os.path.exists(spk_stat_path), f'Missing spk_stat.pt: {spk_stat_path}'
             self.pretrain_models['spk_stat'] = torch.load(spk_stat_path).to(device)
-            self.logger.log(logging.INFO, 'gpt loaded.')
+            self.logger.log(logging.INFO, 'model loaded.')
 
         if decoder_config_path:
             cfg = OmegaConf.load(decoder_config_path)
@@ -152,9 +152,10 @@ class Chat:
                 self.logger.log(logging.WARNING, f'Invalid characters found! : {invalid_characters}')
                 text[i] = apply_character_map(t)
             if do_homophone_replacement and self.init_homophones_replacer():
-                text[i] = self.homophones_replacer.replace(t)
-                if t != text[i]:
-                    self.logger.log(logging.INFO, f'Homophones replace: {t} -> {text[i]}')
+                 text[i], replaced_words = self.homophones_replacer.replace(text[i])
+                 if replaced_words:
+                     repl_res = ', '.join([f'{_[0]}->{_[1]}' for _ in replaced_words])
+                     self.logger.log(logging.INFO, f'Homophones replace: {repl_res}')
 
         if not skip_refine_text:
             text_tokens = refine_text(self.pretrain_models, text, **params_refine_text)['ids']
@@ -173,9 +174,7 @@ class Chat:
         else:
             field = 'ids'
             docoder_name = 'dvae'
-        vocos_decode = lambda spec: [self.pretrain_models['vocos'].decode(
-            i.cpu() if torch.backends.mps.is_available() else i
-        ).cpu().numpy() for i in spec]
+        vocos_decode = lambda spec: [self.pretrain_models['vocos'].decode(i.cpu() if torch.backends.mps.is_available() else i).cpu().numpy() for i in spec]
 
         if stream:
             length = 0

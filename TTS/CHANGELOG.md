@@ -38,13 +38,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - `HomophonesReplacer` class for chinese / mandarin characters.
 - `init_homophones_replacer` method to initialize the homophones replacer in `core.py`.
 - New `thumbnail2.png` image for the `README.md` file.
-- Support of `torch.compile` for Windows. 
+- Support of `torch.compile` for Windows.
 
 ### Fixed
 
 - Ensure that the `pad_token` and `pad_token_id` are properly set when the tokenizer is loaded.
 - Ensure text passed for inference is always in a list.
 - Indentation error in the `Chat::init_normalizer` method.
+- Homophones replacer and improve output clarity.
 
 ### Changed
 
@@ -62,3 +63,4 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - `__init__.py` file from the directories in the `src` directory.
 - `setup.py` file since TTS is now moved to its dedicated folder.
 - `**kwargs` argument from the `AudioGenerator` class.
+- `einops` package used by the `DVAE` class.
