@@ -39,6 +39,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - `init_homophones_replacer` method to initialize the homophones replacer in `core.py`.
 - New `thumbnail2.png` image for the `README.md` file.
 - Support of `torch.compile` for Windows.
+- Support for stream inference for audio generation.
 
 ### Fixed
 
@@ -56,6 +57,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Updated installation and development instructions in the `README.md` documentation file.
 - Improved tensor operation for `DVAE` class via better feature reshaping and decoding.
 - Dependencies versions in the `requirements.txt` file.
+- Renamed files in `utils` directory to not have `_utils` suffix.
 
 ### Removed
 

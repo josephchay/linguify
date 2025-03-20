@@ -13,3 +13,4 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - `setup.py` file for package installation.
 - `README.md` file as documentation guide for the main repository.
 - `assets` directory for storing general images and other assets.
+- `.DS_Store` to `.gitignore` file.

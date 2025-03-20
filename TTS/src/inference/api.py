@@ -2,7 +2,7 @@ import torch
 import torch.nn.functional as F
 from transformers.generation import TopKLogitsWarper, TopPLogitsWarper
 
-from ..utils.inference_utils import CustomRepetitionPenaltyLogitsProcessorRepeat
+from ..utils.inference import CustomRepetitionPenaltyLogitsProcessorRepeat
 
 
 def inference_code(models, text, spk_emb=None, top_P=0.7, top_K=20, temperature=0.3, repetition_penalty=1.05, max_new_token=2048, stream=False, **kwargs):
