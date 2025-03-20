@@ -1,0 +1,11 @@
+[
+    {
+      "question": "What is Flutter?",
+      "answer": "Flutter is an open-source UI software development kit created by Google."
+    },
+    {
+      "question": "What is RAG?",
+      "answer": "Retrieval-Augmented Generation (RAG) is a technique that combines retrieval-based search with generative AI."
+    }
+  ]
+  
