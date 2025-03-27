@@ -1,6 +1,8 @@
 from datasets import load_dataset, Dataset, concatenate_datasets
 import json
 import re
+from datasets import DatasetDict, load_from_disk
+from huggingface_hub import HfApi
 
 # Dataset sources
 datasets_info = [
@@ -62,7 +64,6 @@ def transform3(example):
 
     return {"question": question, "answer": answer}
 
-
 # Rename and format dataset columns
 def rename_column(info, dataset):
     if info["name"] == "medalpaca/medical_meadow_medical_flashcards":
@@ -121,5 +122,13 @@ def combine_dataset():
 
     print("✅ Combined dataset saved!")
 
-# Run the script
-combine_dataset()
+def push_processed_data_to_hugging_face():
+    # Replace with actual dataset name
+    dataset = load_from_disk("combined_dataset")
+
+    # Replace with your desired hugging face repo
+    dataset.push_to_hub("tinjet11/MedicalChatbot")
+
+if __name__ == "__main__":
+    combine_dataset()
+    push_processed_data_to_hugging_face()
