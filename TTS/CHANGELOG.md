@@ -40,6 +40,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - New `thumbnail2.png` image for the `README.md` file.
 - Support of `torch.compile` for Windows.
 - Support for stream inference for audio generation.
+- `del_all` method in `utils/io` directory.
 
 ### Fixed
 
