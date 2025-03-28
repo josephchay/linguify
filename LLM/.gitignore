@@ -5,3 +5,4 @@ __pycache__/
 venv/
 
 finance/E-invoice-pdf
+finance/e-invoice_db
