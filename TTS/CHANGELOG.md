@@ -41,6 +41,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Support of `torch.compile` for Windows.
 - Support for stream inference for audio generation.
 - `del_all` method in `utils/io` directory.
+- Stronger implementation of TTS with stronger and more robust output.
 
 ### Fixed
 
@@ -59,6 +60,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Improved tensor operation for `DVAE` class via better feature reshaping and decoding.
 - Dependencies versions in the `requirements.txt` file.
 - Renamed files in `utils` directory to not have `_utils` suffix.
+- Updated dependencies in `requirements.txt` (added more dependencies).
+- Updated `webui` for more interaction and better error handling.
 
 ### Removed
 
