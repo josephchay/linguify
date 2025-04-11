@@ -4,7 +4,7 @@ import torch
 import torch.nn as nn
 from torch.nn import functional as F
 from omegaconf import DictConfig
-from linguifytts.utils.mask import make_pad_mask
+from src.utils.mask import make_pad_mask
 
 
 class MaskedDiffWithXvec(torch.nn.Module):

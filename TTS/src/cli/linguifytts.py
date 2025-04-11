@@ -2,8 +2,8 @@ import os
 import torch
 from hyperpyyaml import load_hyperpyyaml
 from modelscope import snapshot_download
-from linguifytts.cli.frontend import LinguifyVoiceFrontEnd
-from linguifytts.cli.model import LinguifyVoiceModel
+from src.cli.frontend import LinguifyVoiceFrontEnd
+from src.cli.model import LinguifyVoiceModel
 
 class LinguifyTTS:
     def __init__(self, model_dir):

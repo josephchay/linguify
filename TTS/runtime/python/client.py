@@ -12,7 +12,7 @@ import linguifytts_pb2_grpc
 import grpc
 import torch
 import numpy as np
-from linguifytts.utils.file_utils import load_wav
+from src.utils.file_utils import load_wav
 
 
 def main():

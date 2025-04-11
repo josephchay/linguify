@@ -49,6 +49,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Ensure text passed for inference is always in a list.
 - Indentation error in the `Chat::init_normalizer` method.
 - Homophones replacer and improve output clarity.
+- Corrected imports statement from `linguifytts` to `src`.
 
 ### Changed
 
