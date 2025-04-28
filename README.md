@@ -2,17 +2,15 @@
 
 **Pushing the boundaries of AI-driven automated conversations for call centers.**
 
-Unlock the power of seamless communication with Linguify, the next-generation call center AI that speaks just like a human - fascinatingly even more. 
-Designed with advanced sentiment analysis and deep understanding of human psychology, 
-Linguify goes beyond basic chatbot responses. It listens, understands emotions, and responds naturally, 
+Unlock the power of seamless communication with Linguify, the next-generation call center AI that speaks just like a human - fascinatingly even more.
+Designed with advanced sentiment analysis and deep understanding of human psychology,
+Linguify goes beyond basic chatbot responses. It listens, understands emotions, and responds naturally,
 creating meaningful conversations that build trust and satisfaction.
 
-Whether it's handling complex queries, guiding users with empathy, or delivering personalized experiences, 
-Linguify adapts to every situation with unparalleled fluency. 
-Empower your business with the most human-like conversational AI, 
+Whether it's handling complex queries, guiding users with empathy, or delivering personalized experiences,
+Linguify adapts to every situation with unparalleled fluency.
+Empower your business with the most human-like conversational AI,
 and redefine customer interactions with intelligence, care, and precision.
-
-![Linguify](assets/thumbnail2.png)
 
 _Linguify – Because Conversations Should Resonate._
 
@@ -22,13 +20,12 @@ _Linguify – Because Conversations Should Resonate._
 
 ### Text to Speech (TTS)
 
-Linguify's [Text to Speech (TTS)](TTS/README.md) model is a cutting-edge neural network designed to transform text into highly natural, 
+Linguify's [Chunk-Aware Streaming Modular (CHASM)-TTS Model](TTS/README.md) model is a cutting-edge neural network designed to transform text into highly natural,
 human-like speech with exceptional clarity and expression.
 
 ### Large Language Model (LLM)
 
-Linguify's [Large Language Model (LLM)](LLM/README.md) is an advanced  conversational AI engineered to deliver highly intelligent, 
-human-like responses with remarkable precision and depth.
+Linguify's [Self-Reflective (SR)-RAG](LLM/README.md) is an advanced conversational AI built as an intelligent retrieval and reasoning layer on top of a large language model (LLM), enhancing its ability to deliver highly precise, human-like responses with remarkable depth.
 
 ## Package Installation
 
