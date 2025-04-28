@@ -56,3 +56,7 @@ pip install -e .
 ## Features & Updates
 
 Refer to the [CHANGELOG](CHANGELOG.md) file for the thorough latest updates and features of Linguify.
+
+## Documentation
+
+For comprehensive information about our implementation details, methodology, and findings, please refer to our [research documentation](documentation.pdf) which thoroughly documents everything we've accomplished in this codebase.

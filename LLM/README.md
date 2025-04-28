@@ -1,7 +1,6 @@
+# Linguify Self-Reflective (SR)-RAG Agent Architecture System
 
-# LinguifyChat LLM Agent Architecture System
-
-LinguifyChat is a Large Language Model (LLM) system designed to generate human-like responses to text prompts. This repository provides the code and necessary steps for setting up and using the LinguifyChat LLM agent.
+Our novel Self-Reflective (SR)-RAG enables better instruction-tuning and Query-routing for our Large Language Model (LLM) system designed to generate human-like responses to text prompts. This repository provides the code and necessary steps for setting up and using the LinguifyChat LLM agent.
 
 ## Setup & Development
 
@@ -14,6 +13,7 @@ Start by cloning the repository to your local machine:
 ```bash
 git clone https://github.com/josephchay/linguify.git
 ```
+
 ```bash
 cd linguify/LLM
 ```
@@ -67,5 +67,3 @@ Refer to the [CHANGELOG](CHANGELOG.md) file for detailed updates, changes, and n
 ## License
 
 This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
-
-```
