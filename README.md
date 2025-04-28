@@ -60,3 +60,21 @@ Refer to the [CHANGELOG](CHANGELOG.md) file for the thorough latest updates and 
 ## Documentation
 
 For comprehensive information about our implementation details, methodology, and findings, please refer to our [research documentation](documentation.pdf) which thoroughly documents everything we've accomplished in this codebase.
+
+## Citation
+
+If you use this dataset in your research or application, please cite:
+
+```
+@inproceedings{chayleong2025linguifydataset,
+  author = {Joseph Chay, TinJet Leong},
+  title = {LinguifyDataset},
+  year = {2025},
+  publisher = {Hugging Face},
+  url = {https://huggingface.co/datasets/josephchay/LinguifyDataset}
+}
+```
+
+## Contact
+
+For questions, suggestions, or issues related to this dataset, please contact the creators through [Hugging Face](https://huggingface.co/josephchay/Linguify) or open an issue in our GitHub [repository](https://github.com/josephchay/linguify).
