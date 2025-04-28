@@ -1,8 +1,8 @@
-from datasets import load_dataset, Dataset, concatenate_datasets
+from datasets import load_dataset, Dataset, concatenate_datasets, DatasetDict, load_from_disk
 import json
 import re
-from datasets import DatasetDict, load_from_disk
 from huggingface_hub import HfApi
+
 
 # Dataset sources
 datasets_info = [
@@ -92,7 +92,7 @@ def convert_dataset_format(dataset, filename="train.jsonl"):
             json.dump({"prompt": example["question"],
                       "response": example["answer"]}, f)
             f.write("\n")  # Newline for JSONL format
-    print(f"✅ Dataset converted and saved as {filename}")
+    print(f"Dataset converted and saved as {filename}")
 
 # Load, process, and combine datasets
 def combine_dataset():
@@ -120,7 +120,7 @@ def combine_dataset():
     # Convert to JSONL
     convert_dataset_format(combined_dataset)
 
-    print("✅ Combined dataset saved!")
+    print("Combined dataset saved!")
 
 def push_processed_data_to_hugging_face():
     # Replace with actual dataset name
@@ -128,6 +128,7 @@ def push_processed_data_to_hugging_face():
 
     # Replace with your desired hugging face repo
     dataset.push_to_hub("tinjet11/MedicalChatbot")
+
 
 if __name__ == "__main__":
     combine_dataset()
