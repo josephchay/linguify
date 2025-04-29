@@ -2,7 +2,84 @@
 
 Our proposed novel CHASM-TTS is a system that can convert written text to natural-sounding speech.
 
-For our agent model assets and config files, refer to [Hugging Face model hub](https://huggingface.co/josephchay/Linguify).
+> [!NOTE]
+> All architectures, frameworks, pipelines, models, and preprocessed datasets proposed are completely researched, designed, and implemented with complete success by the authors (Joseph Chay and Leong Tin Jet).
+
+---
+
+## Trained Models Files and Versions
+
+For our agent model assets, config files, and versions, supplemented with usage 
+implementation guides, refer to [Hugging Face model hub](https://huggingface.co/josephchay/Linguify).
+
+---
+
+![Novel CHASM-TTS](../assets/chasm-tts-novel-framework.png)
+
+Our architecture pipeline contains three main components. (a) supervised acoustic tokenizer, with dashed components active
+only during training; (b) unified model handling both text and speech
+inputs in streaming and non-streaming modes, with dashed arrows indicating
+autoregressive decoding during inference; (c) causal flow matching framework
+conditioned on speaker representation v, semantic tokens μ, masked acoustic
+features ˜X, and intermediate latent variable Xt.
+
+![Novel Chunk-Aware Flow](../assets/chunk-aware-novel-framework.png)
+
+To enable streaming synthesis, which allows real-time, interruptable speech generation as text is being received, 
+four specialized attention mask types are strategically implemented in
+our model architecture. They control the information
+flow within the attention mechanisms of the Transformer-based
+components, creating different trade-offs between interruptable
+and synthesis quality. The mask selection directly affects how
+much future context each frame can access during generation:
+
+- Non-causal Mask: Attends to all frames for offline mode 
+- Full-causal Mask: Attends only to past frames for lowest
+latency 
+- Chunk-M Mask: Attends to past and M future frames 
+- Chunk-2M Mask: Extends context for better quality at
+higher latency
+
+## Results and Discussions
+
+![CHASM-TTS Results Graph](../assets/chasm-tts-results.png)
+
+Training was conducted with representations of Speaker
+Identification (SID) task both before and after quantization, which is essential for zero-shot synthesis in Linguify where
+voice characteristics should be independently controlled from
+linguistic content itself. following methodologies similar to
+those in speaker verification research.
+
+Our accuracy curves results, clearly showing that the SID layer
+with quantized tokens fails to converge (positive outcome).
+This inability to learn speaker identification from the tokenized
+representations provides strong evidence of the tokenizer’s
+success in decoupling speaker information from speech content, 
+essential for zero-shot synthesis systems where voice characteristics 
+should be controlled independently from speech
+content, which is supported by recent works.
+
+## Evaluations and Testings
+
+![FSQ Evaluation](../assets/fsq-evaluations.png)
+
+The t-SNE evaluations visualization illustrates the speech representations before
+(a) and after (b) quantization for three different speakers from the dataset.
+(c) presents the codebook utilization, displaying the token percentage across
+speakers, with each bin containing 500 tokens.
+
+### Ablations Studies and Benchmarking
+
+![CHASM-TTS with SOTA](../assets/chasm-tts-with-sota.png)
+
+Further evaluation was conducted on the commonly-used
+SEED test sets: test-en (English), and test-hard (challenging cases). 
+As shown in Table above, on the test-en set, it ranked
+fourth in WER (2.57%) and third in SS (0.736), as other models are 
+trained for longer durations and better GPU hardware. On the challenging
+test-hard set, the model achieved SOTA performance with a
+WER of 6.83% and SS of 0.776, demonstrating robustness in
+difficult synthesis scenarios.
 
 ## Package Installation
 
@@ -171,15 +248,44 @@ handle complex medical terminology with ease, as well as pronouncing them in a v
 
 ## Features & Updates
 
-Refer to the [CHANGELOG](CHANGELOG.md) file for the thorough latest updates and features of **CHASM-TTS**.
+Refer to the [CHANGELOG](CHANGELOG.md) file for the thorough latest updates and features of Linguify.
+
+## License
+
+This project is licensed under the MIT License - see the [LICENSE](../LICENSE.txt) file for details.
+
+## Research Documentation Paper
+
+For comprehensive information about our implementation details, methodology, and findings, please refer to our [research documentation](documentation.pdf) which thoroughly documents everything we've accomplished in this codebase.
+
+## Citation
+
+If you use this project in your research or application, please cite:
+
+```bibtex
+@inproceedings{chayleong2025linguify,
+  author = {Joseph Chay and TinJet Leong},
+  title = {Linguify: Self-Reflective Retrieval-Augmented Generation and
+Chunk-Aware Streaming Modular TTS for Interruptable, Low-Latency
+Chatbot Conversational AI},
+  year = {2025},
+  url = {https://github.com/josephchay/Linguify}
+}
+```
+
+## Contact
+
+For questions, suggestions, or issues related to this project, please contact the creators through [Hugging Face](https://huggingface.co/josephchay/Linguify) or open an issue in our GitHub [repository](https://github.com/josephchay/linguify).
 
 ---
 
-## Previous Implementations (Temporary)
+## Previous Implementations
 
 ### Modelling
 
-Although previous applications can be seen to have files like `gpt.py` and classes like `GPTWrapper`,
-These are merely just names (proven by the absence of any OpenAI API or external API usage).
-It was previously named after as we were using a temporary LLaMA model architecture for our language processing components.
-The actual implementation is fully self-contained and uses our own training and custom code for inference and generation.
+Although previous very earlier commits can be seen to have files like `gpt.py` and classes like `GPTWrapper`, 
+especially their initial introduction in commit `cad8f01a320233df390784bc330a43a7c310a950``,
+These are merely just implementation names (proven by the absence of any OpenAI API or external API usage).
+It was previously named after as we were using a temporary Open Source [Minimized GPT](https://github.com/karpathy/minGPT) 
+model architecture for our language processing components for initial evaluation and testing on CHASM-TTS.
+The actual implementation is fully self-contained and uses our own trained and custom SR-RAG LLM for inference and generation.
